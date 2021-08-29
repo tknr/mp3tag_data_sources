@@ -4,13 +4,17 @@
 
 [Encoding]=url-utf-8
 
+#V0.2
 
-#debug "on"  "c:\Traxsource track direct debug index.html" 20
-#DebugWriteInput "c:\debug-input.out"
+
+
+
 #######################
 
 [ParserScriptAlbum]=...
 
+#debug "on"  "c:\Traxsource track direct debug index.html" 20
+#DebugWriteInput "c:\debug-input.out"
 
 findline "<!DOCTYPE html>"
 joinuntil "</html>"
@@ -38,7 +42,7 @@ regexpreplace "<td>Genre:<\/td><td class=\"det\"><a href=\"[^\"]*\">([^<]*)<\/a>
 regexpreplace "<td>Released:<\/td><td class=\"det\">([^<]*)<\/td>" "<TrackDate=$1>"
 regexpreplace "<td>Released:<\/td><td class=\"det\"><span class='pre-ord-txt'>Pre-order for\s+([^<]*)<\/span><\/td>" "<TrackDate=$1>"
 regexpreplace "<div class=\"trk-cell r-date\"><span class='pre-ord-txt'>Pre-order for\s+([^<]*)<\/span><\/div>" "<TrackDate=$1>"
-regexpreplace "class=\"com-buy\" data-cart=\"\{title_id: ([^,]*), track_id: ([^\}]*)\}\"" "<TrackTitleID1=$1> <TrackTrackID1=$2>"
+regexpreplace "class=\"com-buy\" data-cart=\"\{title_id: ([^,]*), track_id: ([^\}]*)\}\"\s+title=\"Add to Cart\"><span class=\"price\">([^<]*)<\/span>" "<TrackTitleID1=$1> <TrackTrackID1=$2> <TrackPrice=$3>"
 
 regexpreplace "<TrackMixName=\s*>" "<TrackMixName=>"
 regexpreplace "<TrackMixName=([^>]+)\s*>" "<TrackMixName=$1>"
@@ -111,8 +115,8 @@ regexpreplace "<TrackMixName=>" "<TrackMixName=original>"
 # HTML PArsing #
 #::::::::::::::#
 
+#debug "on"  "c:\Traxsource track direct debug index.html" 20
 #DebugWriteInput "c:\debug-input.out"
-#debug "on"  "c:\Traxsource track search debug index.html" 20
 
 
 outputto "COVERURL"
@@ -148,6 +152,8 @@ sayregexp "(?<=<TrackTitleID1=)[^>]*"
 IfNotOutput "TRAXSOURCE_TITLEID"
 sayregexp "(?<=<TrackTitleID2=)[^>]*"
 endif
+outputto "TRAXSOURCE_TRACKPRICE"
+sayregexp "(?<=<TrackPrice=)[^>]*"
 outputto "COVERURL"
 sayregexp "(?<=<AlbumURL=)[^>]*"
 outputto "ALBUM"
@@ -166,6 +172,7 @@ say "(Traxsourced)"
 # set "ARTIST"
 # set "TRAXSOURCE_TITLEID"
 # set "TRAXSOURCE_TRACKID"
+# set "TRAXSOURCE_TRACKPRICE"
 # set "BPM"
 # set "COMMENT"
 # set "COMPILATION"
