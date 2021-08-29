@@ -1,0 +1,28 @@
+﻿#    _                   _                        _
+#   | |                 | |                      | |
+#   | |__    ___   __ _ | |_  _ __    ___   _ __ | |_     ___  ___   _ __ ___
+#   | '_ \  / _ \ / _` || __|| '_ \  / _ \ | '__|| __|   / __|/ _ \ | '_ ` _ \
+#   | |_) ||  __/| (_| || |_ | |_) || (_) || |   | |_  _| (__| (_) || | | | | |
+#   |_.__/  \___| \__,_| \__|| .__/  \___/ |_|    \__|(_)\___|\___/ |_| |_| |_|      _
+#                    (_)     | | |        | |                 | |                   | |
+#    ___   ___  _ __  _  _ __|_| |_  ___  | |__   _   _   ___ | |_  ___ __   __ ___ | |__    ___  _ __  ___ TM
+#   / __| / __|| '__|| || '_ \ | __|/ __| | '_ \ | | | | / __|| __|/ _ \\ \ / // _ \| '_ \  / _ \| '__|/ _ \
+#   \__ \| (__ | |   | || |_) || |_ \__ \ | |_) || |_| | \__ \| |_|  __/ \ V /|  __/| | | ||  __/| |  | (_) |
+#   |___/ \___||_|   |_|| .__/  \__||___/ |_.__/  \__, | |___/ \__|\___|  \_/  \___||_| |_| \___||_|   \___/
+#                       | |                        __/ |
+#                       |_|                       |___/
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
+#                                 .:: [v5.12 by stevehero™] [2021.06.08] ::.                              #
+# https://community.mp3tag.de/t/beatport-com-wss-by-stevehero-release-single-track-artwork-tagging/12568  #
+#                          .:: Please read the 'Version History + Readme' file ::.                        #
+#                    .:: DO NOT COPY/MODIFY OR REDISTRIBUTE THIS WITHOUT PERMISSION ::.                   #
+#                 .:: This file should be stored in your tag sources sources directory ::.                #
+#                                      %APPDATA%\Mp3tag\data\sources                                      #
+#                                  and requires Mp3tag v3.03d or above.                                   #
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
+#                          .:: You can buy me a beer or an EP on beatport ::.                             #
+#     https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EZVJN8ZLEU8KC&source=url       #
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
+
+[SearchBy]=TRACK Search by BEATPORT_TRACK_ID ||https://www.beatport.com/track/-/%beatport_track_id%||%s
+[Include]=Beatport by &stevehero v5.0_Track Direct.inc

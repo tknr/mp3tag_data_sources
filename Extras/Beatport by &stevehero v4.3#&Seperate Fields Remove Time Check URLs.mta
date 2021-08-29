@@ -1,0 +1,14 @@
+﻿[#0]
+T=9
+F="_TIME CHECK
+
+[#1]
+T=16
+F=BEATPORT_ARTIST_URL
+1=\\\\
+
+[#2]
+T=16
+F=TRAXSOURCE_ARTIST_URL
+1=\\\\
+

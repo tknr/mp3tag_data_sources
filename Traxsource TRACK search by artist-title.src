@@ -1,0 +1,2 @@
+﻿[SearchBy]= $regexp($trim($regexp($regexp(%artist%,'\b featuring \b|\b feat \b|\b, feat. \b|\b presents \b|\b pres \b|\b and \b|\b & \b|\s+|\b vs \b', ),'&',)) $trim($regexp($regexp(%title%,'\boriginal\b|\bextended\b',),'\brework\b|\bextended\b|\boriginal\b|\bOriginal\b|\bclub\b|\bdub\b|\bVocal\b|\bExtended\b|\bRemix\b|\bmix\b|\bremix\b|[()]| vinyl | web |\b vocal\b|\bThe \b|\b the\b|\b edit\b| www|\s+ ', )),'\,',' ')
+[Include]=Traxsource Track Search by Will Remainunknown.inc
