@@ -4,3 +4,5 @@
 
 [TRAXSOURCE\.com scripts \- Development / Web Sources Discussion \- Mp3tag Community](https://community.mp3tag.de/t/traxsource-com-scripts/19105/20)
 
+[\[WS\] iTunes \- Development / Web Sources Scripts \- Mp3tag Community](https://community.mp3tag.de/t/ws-itunes/13478/323)
+
