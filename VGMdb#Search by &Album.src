@@ -1,0 +1,76 @@
+# ###################################################################
+# Mp3tag parsing for VGMdb.net, created by dano on 2010-01-20.
+#
+#
+# Copy this file to your sources directory at
+# %APPDATA%\Mp3tag\data\sources
+#
+# After 26.06.2020, changes in the commits: https://github.com/romanoh/Mp3tag-Repository
+# Last update: 03.11.2020
+# ###################################################################
+
+[Name]=VGMdb - Search by Album
+[BasedOn]=vgmdb.net
+[IndexUrl]=https://vgmdb.net/search?q=
+[AlbumUrl]=https://vgmdb.net/album/
+[WordSeparator]=+
+[IndexFormat]=% ↓ Catalog%|%_url%|% ↓ Album%|% ↓ Year%|% ↓ Media%																	
+#remove everything inside ()
+[SearchBy]=Enter Album Name||$regexp(%album%,'\([^)]*\)',,1)||%s
+[Encoding]=url-utf-8
+[Include]=VGMdbAlbumParser.inc
+
+[ParserScriptIndex]=...
+# ###################################################################
+#					I  N  D  E  X
+# ###################################################################
+
+findline "<tr rel='rel_" 1 1
+
+ifnot "<tr rel"
+	say "|"
+	sayoutput "CurrentURL"
+	say "|"
+	say "|"
+	say "|"
+	#put exit for direct album tags
+	exit
+endif
+
+do   
+    # Catalog	
+    replace "|" "/"
+    findinline "span class="
+    findinline ">"
+    sayuntil "</span"
+    say "|"
+    
+    # URL
+    findinline "https://vgmdb.net/album/"
+    sayuntil "\""
+    say "|"
+	
+    # Album
+    findinline "class=\"albumtitle\""
+    findinline "\">"
+    sayuntil "</span>"
+    say "|"
+    
+    # Year
+    findinline "&month=" 1 1
+    findinline "#" 1 1
+    SayNChars 4
+    say "."
+    SayNChars 2
+    say "."
+    SayNChars 2
+    say "|"
+	
+    # Media
+    findinline "nowrap='nowrap'>" 1 1
+    sayuntil "</"
+    saynewline
+    
+    moveline 1 1
+    unspace
+while "<tr rel='rel_" 55

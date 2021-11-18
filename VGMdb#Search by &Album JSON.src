@@ -1,0 +1,391 @@
+# ######################################################################
+# Mp3tag parsing for VGMdb.net, Created by Romano.
+#
+# Copy this file to your sources directory at
+# %APPDATA%\Mp3tag\data\sources
+#
+# Changes in the commits: https://github.com/romanoh/Mp3tag-Repository
+# Last update 24.08.2021
+# -Fix: Clean up.
+#
+# ######################################################################
+
+[Name]=VGMdb [v.31.03.2021]
+[BasedOn]=vgmdb.info
+[IndexUrl]=http://vgmdb.info/search?q=
+[AlbumUrl]=http://vgmdb.info/
+[WordSeparator]=+
+[IndexFormat]=% ↓ Catalog%|%_url%|% ↓ Year%|% ↓ Album%
+#remove everything inside ()
+[SearchBy]=Enter Album Name||$regexp(%album%,'\([^)]*\)',,1)||%s
+[Encoding]=url-utf-8
+[UserAgent]=1
+
+[ParserScriptIndex]=...
+# ###################################################################
+#					I  N  D  E  X
+# ###################################################################
+#DebugWriteInput "C:\Users\%user%\Desktop\mp3tag_vgmdb_json.html"
+#Debug "ON" "C:\Users\%user%\Desktop\mp3tag_vgmdb_json.txt"
+
+json "ON" 
+
+json_select "results"
+	json_foreach "albums"
+
+		# Catalog
+		json_select "catalog"
+		SayRest
+		Say "|"
+
+		# Link
+		json_select "link"
+		SayRest
+		Say "|"
+		
+		# Year
+		json_select "release_date"
+		SayRest
+		Say "|"
+		
+		# Album
+		json_select "titles"
+		json_select "en"
+		SayRest
+		
+		SayNewline
+
+	json_foreach_end
+	
+
+################################################################################
+#                        ADJUST TAG INFORMATION DIALOG                         #
+################################################################################
+[ParserScriptAlbum]=...
+
+## Comment/uncomment for debugging purposes:
+#DebugWriteInput "C:\Users\%user%\Desktop\mp3tagvgmdb.html"
+#Debug "ON" "C:\Users\%user%\Desktop\mp3tagdebug.txt"
+
+json "ON"
+
+# LYRICIST
+OutputTo "LYRICIST"
+json_foreach "lyricists"
+# ifnot "0" is for when there is no data or lenght of array, The index starts at zero and not one. Few languages use 1 as the first index.
+	ifnot "0"
+		json_select_object "names"
+		if "names"
+			json_select "en"
+			ifnot ""
+				ifoutput "LYRICIST"
+					say "; "
+				endif
+				sayrest
+			endif
+			json_unselect_object
+		endif		
+	endif
+json_foreach_end
+
+# roles
+json_foreach "organizations"
+ifnot "0"
+	json_select "role"
+			if "manufacturer"
+			OutputTo "manufacturer"
+				json_select_object "names"
+					if "names"
+						json_select "en"
+						sayrest
+						json_unselect_object
+					endif
+			else
+				if "label"
+				OutputTo "label"
+							json_select_object "names"
+							if "names"
+								json_select "en"
+								sayrest
+								json_unselect_object
+							endif
+				endif
+			else
+				if "retailer"
+				OutputTo "retailer"
+							json_select_object "names"
+							if "names"
+								json_select "en"
+								sayrest
+								json_unselect_object
+							endif
+				endif
+			else
+				if "distributor"
+				OutputTo "distributor"
+							json_select_object "names"
+							if "names"
+								json_select "en"
+								sayrest
+								json_unselect_object
+							endif
+				endif
+			endif
+			
+endif
+json_foreach_end
+
+# Arrangers
+outputto "CONDUCTOR"
+json_foreach "arrangers"
+	ifnot "0"
+		json_select_object "names"
+		if "names"
+			json_select "en"
+			ifnot ""
+				ifoutput "CONDUCTOR"
+					say ", "
+				endif
+				sayrest
+			endif
+			json_unselect_object
+		endif
+	endif
+json_foreach_end
+
+# barcode
+OutputTo "Barcode"
+json_select "barcode"
+ifnot "0"
+	SayRest	
+endif
+
+# Catalog
+OutputTo "Catalog"
+json_select "catalog"
+SayRest
+
+# notes
+OutputTo "notes"
+json_select "category"
+SayRest
+
+
+# Involved People
+OutputTo "INVOLVEDPEOPLE"
+json_foreach "organizations"
+	ifnot "0"
+		json_select "role"
+		ifnot ""
+			ifoutput "INVOLVEDPEOPLE"
+				
+			endif
+			sayrest
+			say ":"
+			json_select_object "names"
+			if "names"
+				json_select "en"
+				sayrest
+				json_unselect_object
+			endif
+			say ";"
+		endif
+	endif
+json_foreach_end
+
+# Genre
+OutputTo "genre"
+json_select "classification"
+SayRest
+
+# Album
+OutputTo "ALBUM"
+json_select "name"
+SayRest
+
+# Artist 
+outputto "artist"
+json_foreach "performers"
+	ifnot "0"
+		json_select_object "names"
+		if "names"
+			json_select "en"
+			ifoutput "artist"
+				say ", "
+			endif
+			sayrest
+			json_unselect_object
+		endif
+	endif
+json_foreach_end		
+
+# Composers
+json_foreach "composers"
+	ifnot "0"
+		json_select_object "names"
+		if "names"
+			json_select "en"
+
+			set "TEMP_composer"
+			outputto "TEMP_composer"
+			sayrest
+			outputto "composer"
+			ifoutput "composer"
+				say ", "
+			endif
+			sayoutput "TEMP_composer"
+
+			outputto "artist"
+			ifoutput "artist"
+				say ", "
+			endif
+			sayoutput "TEMP_composer"
+			set "TEMP_composer"
+
+			json_unselect_object
+		endif
+	endif
+json_foreach_end
+
+# Tracks English to Japanese to Romaji to Italian
+json_foreach "discs"
+	ifnot "0"
+	
+		# Number of discs
+		outputto "TotalDiscs"
+		sayrest
+		
+		# Discnumber
+		json_select "discs"
+		ifnot ""
+			outputto "Discnumber"
+			sayrest
+		endif
+		
+		# Title
+		json_foreach "tracks"
+			ifnot "0"
+			
+				# Track nr
+				outputto "tracks"
+				say "|"
+			
+				#Lenght
+				outputto "_LENGTH"
+				json_select "track_length"
+				sayrest
+				say "|"
+								
+				json_select_object "names"
+				if "names"
+					set "TEMP_Title"
+					OutputTo "TEMP_Title"
+					
+					ifNotOutput "TEMP_Title"
+						json_select "English"
+						ifnot ""
+							SayRest
+						endif
+					endif
+					
+					ifNotOutput "TEMP_Title"
+						json_select "Japanese"
+						ifnot ""
+							SayRest
+						endif
+					endif
+					
+					ifNotOutput "TEMP_Title"
+						json_select "Romaji"
+						ifnot ""
+							SayRest
+						endif
+					endif
+					
+					ifNotOutput "TEMP_Title"
+						json_select "Italian"
+						ifnot ""
+							SayRest
+						endif
+					endif
+					
+					say "|"
+					outputto "Title"
+					sayoutput "TEMP_Title"
+					set "TEMP_Title"
+					json_unselect_object
+				endif
+				
+			endif
+		json_foreach_end	
+	endif
+json_foreach_end		
+
+
+
+# Media type
+OutputTo "MEDIATYPE"
+json_select "media_format"
+SayRest
+	
+# Comments
+OutputTo "comment"
+json_select "notes"
+SayRest	
+	
+# Cover
+OutputTo "COVERURL"
+json_select "picture_full"
+SayRest
+## You can choose the cover resolution here
+# json_select "picture_small"
+# json_select "picture_thumb"
+
+# Publish_format
+OutputTo "format"
+json_select "publish_format"
+SayRest
+
+# Rating
+OutputTo "rating"
+json_select "rating"
+ifnot "0"
+	SayRest	
+endif
+
+# Release_date
+OutputTo "YEAR"
+json_select "release_date"
+RegexpReplace "^.*?(?:^|\D)(\d{4})(?:\D|$).*$" "$1"
+SayRegexp "^.*$"
+
+# vgmdb_link
+OutputTo "www"
+json_select "vgmdb_link"
+SayRest
+
+# Event
+outputto "Event"
+json_foreach "release_events"
+	ifnot "0"
+		json_select "name"
+		sayrest
+	endif
+json_foreach_end
+
+# Publisher
+OutputTo "publisher"
+json_select "publisher"
+ifnot "0"
+	json_select_object "names"
+		if "names"
+			json_select "en"
+			sayrest
+			json_unselect_object
+		endif
+endif
+
+# Set Artist = Albumartist
+set "albumartist"
+outputto "albumartist"
+sayoutput "Artist"
