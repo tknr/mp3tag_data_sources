@@ -6,6 +6,9 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2022-10-03] v1.12 FIX: issue with artist names containing vertical bar character.
+# [2022-04-13] v1.11 FIX: issue when parsing joinphrases
+# [2022-03-23] v1.10 NEW: added fields BARCODE, CATALOGNUMBER, ISRC, and MUSICBRAINZ_ALBUMRELEASECOUNTRY.
 # [2020-11-11] v1.09 NEW: added fields ALBUMARTIST, ALBUMARTISTSORT, and MUSICBRAINZ_ALBUMARTISTID.
 # [2020-01-12] v1.08 NEW: added MusicBrainz field MUSICBRAINZ_RELEASEGROUPID.
 # [2019-12-04] v1.07 CHG: changed to use multi-field search option in SearchBy
@@ -50,7 +53,7 @@ do
 
 	# URL
 	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
-	say "?inc=artists+artist-credits+labels+recordings+release-groups"
+	say "?inc=artists+artist-credits+labels+recordings+release-groups+isrcs"
 	say "|"
 
 	# Score
@@ -104,6 +107,8 @@ while "<release "
 #					A  L  B  U  M
 # ###################################################################
 
+replace "|" "$verticalBar()"
+
 joinuntil "</metadata>"
 
 # MusicBrainz Album ID
@@ -119,8 +124,8 @@ sayuntil "</title>"
 outputto "Albumartist"
 findinline "<artist-credit><name-credit"
 if " joinphrase"
-	regexpreplace "<name-credit joinphrase=\"(.+?)\">(<artist id=\".+?\">)(<name>)(.+?)(</name>)" "<name-credit$2$3$4$1$5"
-	regexpreplace "<name-credit joinphrase=\"(.+?)\">(<name>)(.+?)(</name>)" "<name-credit$2$3$1$4"
+	regexpreplace "<name-credit joinphrase=\"([^>]+?)\">(<artist id=\".+?\">)(<name>)(.+?)(</name>)" "<name-credit$2$3$4$1$5"
+	regexpreplace "<name-credit joinphrase=\"([^>]+?)\">(<name>)(.+?)(</name>)" "<name-credit$2$3$1$4"
 	findinline "<artist-credit>"
 
 	do
@@ -224,7 +229,6 @@ else
 	gotoline 1
 endif
 
-
 # Publisher
 findinline "<label id=\"" 1 1
 movechar -11
@@ -232,10 +236,36 @@ if "<label id=\""
 	outputto "Publisher"
 	findinline "<name>"
 	sayuntil "</name>"
-else
-	gotoline 1
 endif
+gotoline 1
 
+# MusicBrainz Album Release Country
+findinline "<country>" 1 1
+movechar -9
+if "<country>"
+	outputto "MUSICBRAINZ_ALBUMRELEASECOUNTRY"
+	movechar 9
+	sayuntil "</country>"	
+endif
+gotoline 1
+
+# Barcode
+findinline "<barcode>" 1 1
+movechar -9
+if "<barcode>"
+	outputto "BARCODE"
+	movechar 9
+	sayuntil "</barcode>"	
+endif
+gotoline 1
+
+# Catalog number
+findinline "<catalog-number>" 1 1	
+movechar -16
+if "<catalog-number>"
+    outputto "CatalogNumber"
+    sayregexp "(?<=catalog-number>)[^<]+(?=<)" ", " "</label-info-list>"
+endif
 gotoline 1
 
 replace "</track-list></medium></medium-list>" ""
@@ -310,6 +340,11 @@ do
 	# _LENGTH
 	outputto "_LENGTH"
 	sayregexp "(?<=<length>)[^<]+(?=</length>)" ", " "</track>"
+	say "|"
+
+	# ISRC
+	outputto "ISRC"
+	sayregexp "(?<=<isrc id=\")[^\"]+(?=\")" ", " "</track>"
 	say "|"
 
 	# MusicBrainz Track ID
