@@ -7,6 +7,7 @@
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.97b or above.
 #
+# [2022-03-22] v1.10 CHG: renamed CATALOGID to CATALOGNUMBER to improve compatibility with other software.
 # [2019-11-09] v1.09 CHG: changed to use double pipe symbol as search-by delimiter.
 # [2019-09-09] v1.08 CHG: added descriptive syntax for SearchBy parameter.
 # [2019-05-23] v1.07 FIX: titles with pipe symbol were identified as different titles.
@@ -82,7 +83,7 @@ ifoutput "TMP_PRIMARY"
 endif
 
 # Catalog Number
-outputto "CATALOGID"
+outputto "CATALOGNUMBER"
 json_select_many "labels" "catno" ", "
 sayrest
 
