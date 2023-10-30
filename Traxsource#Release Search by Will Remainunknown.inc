@@ -6,15 +6,14 @@
 [IndexFormat]=% ↓ TitleID%|% ↓ Release%|% ↓ ARTIST/S%|% ↓ Label%|%_URL%
 [Encoding]=url-utf-8
 
-
-#V0.2
-
+# V0.3
+# Mp3tag v3.22+ is required
 
 #######################
 [ParserScriptIndex]=...
 
-#debug "on"  "c:\Traxsource release search debug index.html" 20
-#DebugWriteInput "c:\debug-input.out"
+debug "on"  "c:\Traxsource release debug index.html" 20
+DebugWriteInput "c:\debug-input.out"
 
 findline "<!DOCTYPE html>"
 findinline "<!DOCTYPE html>"
@@ -61,10 +60,10 @@ while "<<nextTrack>>" 99
 #::::::::::::::#
 [ParserScriptAlbum]=...
 #::::::::::::::#
-
-
 #DebugWriteInput "c:\debug-input.out"
-#debug "on"  "c:\Traxsource release search debug index.html" 20
+
+#debug "on"  "c:\Traxsource Release direct debug index.html"
+
 
 findline "<!DOCTYPE html>"
 joinuntil "</html>"
@@ -72,7 +71,7 @@ replace "|" "$verticalBar()"
 unspace
 
 
-regexpreplace "class=\"com-buy\" data-cart=\"{title_id:\s(\d+)}\" title=\"Add to Cart\"><span class=\"price\">([^<]+)<\/span>" "<TitleTracks=> <TitleID=$1> <TitlePrice=$2>"
+regexpreplace "class=\"com-buy\" data-cart=\"{title_id:\s(\d+)}\" title=\"Add to Cart\"><span class=\"price\">([^<]+)<\/span>" "<TitleID=$1> <TitlePrice=$2>"
 
 regexpreplace "<meta property=\"og:image\"\s?content=\"([^\"]+)\">"  "<AlbumImageURL=$1>" "data-tracks="
 regexpreplace "<meta property=\"og:url\"\s?content=\"([^\"]+)\">"  "<AlbumURL=$1>" "data-tracks="
@@ -166,15 +165,21 @@ regexpreplace "<TrackMixName=>" "<TrackMixName=original>"
 # HTML PArsing #
 #::::::::::::::#
 
-#DebugWriteInput "c:\debug-input.out"
-#debug "on"  "c:\Traxsource release search debug index.html" 20
+# DebugWriteInput "c:\debug-input.out"
+
+# debug "on"  "c:\Traxsource debug index.html" 20
+
+
+
 
 outputto "COVERURL"
 sayregexp "(?<=<AlbumImageURL=)[^>]+"
-outputto "TraxSource_TitleID"
+outputto "TRAXSOURCE_TITLEID"
 sayregexp "(?<=<TitleID=)[^>]+"
 outputto "ALBUM"
 sayregexp "(?<=<AlbumName=)[^>]+"
+outputto "LABEL"
+sayregexp "(?<=<AlbumLabel=)[^>]+"
 outputto "YEAR"
 sayregexp "(?<=<AlbumReleaseDate=)[^>]+"
 # ALBUMARTIST
@@ -184,69 +189,59 @@ outputto "WWW"
 sayregexp "(?<=<AlbumURL=)[^>]+"
 outputto "CATALOG #"
 sayregexp "(?<=<AlbumCatalogID=)[^>]+"
-outputto "TraxSource_TitlePrice"
+outputto "TRAXSOURCE_ALBUMPRICE"
 sayregexp "(?<=<TitlePrice=)[^>]+"
+
 outputto "COMMENT"
 say "(Traxsourced)"
 
-findline "<!DOCTYPE html>"
-do
-findinline "<<NextTrack>>"  1 1
+outputto "TRAXSOURCE_TRACKID"
+sayregexp "(?<=<TrackID=)[^>]+" "|" "<<EndAlbum>>"
 
-	set "TotalTracks" ""
-	outputto "TotalTracks"
-	sayregexp "(?<=<TrackNum=)[^>]+" "" "<<EndTrack>>"
+outputto "TRAXSOURCE_TRACKPRICE"
+sayregexp "(?<=<TrackPrice=)[^>]+" "|" "<<EndAlbum>>"
 
-	outputto "TITLE"
-	sayregexp "(?<=<TrackName=)[^>]+" "" "<<EndTrack>>"
-	say " ("
-	sayregexp "(?<=<TrackMixName=)[^>]+" "" "<<EndTrack>>"
-	say ")"
-	say "|"
-	outputto "LENGTH"
-	sayregexp "(?<=<TrackLength=)[^>]+" "" "<<EndTrack>>"
-	say "|"
-	outputto "ARTIST"
-	sayregexp "(?<=<TrackArtistName=)[^>]+" ", " "<<EndTrack>>"
-	say "|"
-	outputto "MIXARTIST"
-	sayregexp "(?<=<TrackRemixerName=)[^>]+" ", " "<<EndTrack>>"
-	say "|"
-	outputto "GENRE"
-	sayregexp "(?<=<TrackGenre=)[^>]+" "" "<<EndTrack>>"
-	say "|"
-	outputto "TrackURL"
-	say "https://www.traxsource.com"
-	sayregexp "(?<=<TrackURL=)[^>]+" "" "<<EndTrack>>"
-	say "|"
+outputto "GENRE"
+sayregexp "(?<=<TrackGenre=)[^>]+" "|" "<<EndAlbum>>"
 
-	findinline "<<EndTrack>>" 1 1
+outputto "LENGTH"
+sayregexp "(?<=<TrackLength=)[^>]+" "|" "<<EndAlbum>>"
 
-while "<<NextTrack>>" 99
-
-findline "<!DOCTYPE html>" 1 1
-outputto "TraxSource_TrackID"
-sayregexp "(?<=<TrackID=)[^>]+" "|"
-
-findline "<!DOCTYPE html>" 1 1
-outputto "TraxSource_TrackPrice"
-sayregexp "(?<=<TrackPrice=)[^>]+" "|"
-
-do
-findinline "<<NextTrack>>"  1 1
-
-	outputto "TRACKS"
-		sayregexp "(?<=<TrackNum=)[^>]+" "" "class=\"follow\""
-		say "/"
-		sayoutput "TotalTracks"
-		say "|"
-
-	findinline "<<EndTrack>>" 1 1
-
-while "<<NextTrack>>" 99
+outputto "TrackURL"
+say "https://www.traxsource.com"
+sayregexp "(?<=<TrackURL=)[^>]+" "|https://www.traxsource.com" "<<EndAlbum>>"
 
 outputto "TRACK"
-sayoutput "TRACKS"
+sayregexp "(?<=<TrackNum=)[^>]+" "|" "<<EndAlbum>>"
+
+set "TOTALTRACKS" ""
+outputto "TOTALTRACKS"
+sayregexp "(?<=<TrackNum=)[^>]+" "|" "<<EndAlbum>>"
+
+
+do
+findinline "<<NextTrack>>"  1 1
+
+set "TOTALTRACKS" ""
+outputto "TOTALTRACKS"
+sayregexp "(?<=<TrackNum=)[^>]+" "" "<<EndTrack>>"
+say "|"
+outputto "TITLE"
+sayregexp "(?<=<TrackName=)[^>]+" "" "<<EndTrack>>"
+say " ("
+sayregexp "(?<=<TrackMixName=)[^>]+" "" "<<EndTrack>>"
+say ")"
+say "|"
+outputto "ARTIST"
+sayregexp "(?<=<TrackArtistName=)[^>]+" ", " "<<EndTrack>>"
+say "|"
+outputto "MIXARTIST"
+sayregexp "(?<=<TrackRemixerName=)[^>]+" ", " "<<EndTrack>>"
+say "|"
+
+findinline "<<EndTrack>>" 1 1
+
+while "<<NextTrack>>" 99
 
 
 
@@ -254,13 +249,12 @@ sayoutput "TRACKS"
 
 # set "LENGTH"
 # set "ALBUM"
-# set "TotalTracks"
+# set "TOTALTRACKS"
 # set "ALBUMARTIST"
 # set "ARTIST"
-# set "TraxSource_TitleID"
-# set "TraxSource_TrackID"
-# set "TraxSource_TrackPrice"
-# set "TraxSource_TitlePrice"
+# set "TRAXSOURCE_TITLEID"
+# set "TRAXSOURCE_TRACKID"
+ set "TRAXSOURCE_TRACKPRICE"
 # set "CATALOG #"
 # set "BPM"
 # set "COMMENT"
@@ -271,4 +265,5 @@ sayoutput "TRACKS"
 # set "PUBLISHER"             # RECORD LABEL
 # set "TITLE"
 # set "TRACK"
+
 # set "YEAR"

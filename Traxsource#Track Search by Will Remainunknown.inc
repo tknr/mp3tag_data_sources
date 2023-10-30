@@ -6,13 +6,13 @@
 [IndexFormat]=% ↓ RELEASED%|% ↓ GENRE/S%|% ↓ LENGTH%|% ↓ TrackID %|% ↓ TITLE%|% ↓ ARTIST/S%|% ↓ REMIXER/S%|%_URL%
 [Encoding]=url-utf-8
 
-#V0.2
+# V0.3
+# Mp3tag v3.22+ is required
 
 #######################
 [ParserScriptIndex]=...
-
-#DebugWriteInput "c:\debug-input.out"
-#debug "on"  "c:\Traxsource track search debug index.html" 20
+# DebugWriteInput "c:\debug-input.out"
+# debug "on"  "c:\Traxsource track search debug index.html" 20
 
 findline "<!DOCTYPE html>"
 findinline "<!DOCTYPE html>"
@@ -27,7 +27,7 @@ regexpreplace "\s+" " "
 regexpreplace "\(+" "("
 regexpreplace "\)+" ")"
 regexpreplace "(\([^\(|\)]{1,100})\s+(\()" "$1) ("
-regexpreplace "<div data-trid=\"([^\"]*)\"" "<<endTrack>><<nextTrack>><TrackTrackID1=$1>"
+regexpreplace "<div data-trid=\"([^\"]*)\"" "<<endTrack>><<nextTrack>><TrackTrackID=$1>"
 regexpreplace "<!--DIV title--><a href=\"([^\"]*)\">([^<]*)<\/a>" "<TrackUrl=$1> <TrackName=$2>"
 regexpreplace "<span class=\"version\">([^<]*)<span class=\"duration\">\(([^\)]*)\)<\/span>" "<TrackMixName=$1><TrackLength=$2>"
 
@@ -46,49 +46,49 @@ regexpreplace "<TrackMixName=([^>]+)\s*>" "<TrackMixName=$1>"
 
 #
 # Main Mix >> original
-regexpreplace "<TrackMixName=([^>]*)Main Mix\s*>" "<TrackMixName=$1original>"
+# regexpreplace "<TrackMixName=([^>]*)Main Mix\s*>" "<TrackMixName=$1original>"
 #
 # Instrumental Mix >> instrumental
-regexpreplace "<TrackMixName=([^>]*)Instrumental Mix\s*>" "<TrackMixName=$1instrumental>"
+# regexpreplace "<TrackMixName=([^>]*)Instrumental Mix\s*>" "<TrackMixName=$1instrumental>"
 #
 # rework >> remix
-regexpreplace "<TrackMixName=([^>]*)rework\s*>" "<TrackMixName=$1remix>"
+# regexpreplace "<TrackMixName=([^>]*)rework\s*>" "<TrackMixName=$1remix>"
 #
 # Vocal Mix >> original
-regexpreplace "<TrackMixName=([^>]*)Original Vocal Mix\s*>" "<TrackMixName=>$1original>"
+# regexpreplace "<TrackMixName=([^>]*)Original Vocal Mix\s*>" "<TrackMixName=>$1original>"
 #
 # Extended Version >> extended
-regexpreplace "<TrackMixName=([^>]*)Extended Version\s*>" "<TrackMixName=$1extended>"
+# regexpreplace "<TrackMixName=([^>]*)Extended Version\s*>" "<TrackMixName=$1extended>"
 #
 # Dub Mix >> dub
-regexpreplace "<TrackMixName=([^>]*)Dub Mix\s*>" "<TrackMixName=$1dub>"
+# regexpreplace "<TrackMixName=([^>]*)Dub Mix\s*>" "<TrackMixName=$1dub>"
 #
 # Extended Mix >> extended
-regexpreplace "<TrackMixName=([^>]*)Extended Mix\s*>" "<TrackMixName=$1extended>"
+# regexpreplace "<TrackMixName=([^>]*)Extended Mix\s*>" "<TrackMixName=$1extended>"
 #
 # Original Mix >> original
-regexpreplace "<TrackMixName=([^>]*)Original Mix\s*>" "<TrackMixName=$1original>"
+# regexpreplace "<TrackMixName=([^>]*)Original Mix\s*>" "<TrackMixName=$1original>"
 #
 # Club Mix original >> Club Mix
-regexpreplace "<TrackMixName=([^>]*)Club Mix original\s*>" "<TrackMixName=$1Club Mix>"
+# regexpreplace "<TrackMixName=([^>]*)Club Mix original\s*>" "<TrackMixName=$1Club Mix>"
 #
 # original Club Mix >> Club Mix
-regexpreplace "<TrackMixName=>([^>]*)original Club Mix\s*>" "<TrackMixName=$1Club Mix>"
+# regexpreplace "<TrackMixName=>([^>]*)original Club Mix\s*>" "<TrackMixName=$1Club Mix>"
 #
 # Extended Mix original >> extended
-regexpreplace "<TrackMixName=([^>]*)Extended Mix original\s*>" "<TrackMixName=$1extended>"
+# regexpreplace "<TrackMixName=([^>]*)Extended Mix original\s*>" "<TrackMixName=$1extended>"
 #
 # Dub Mix original >> dub
-regexpreplace "<TrackMixName=([^>]*)Dub Mix original\s*>" "<TrackMixName=$1dub>"
+# regexpreplace "<TrackMixName=([^>]*)Dub Mix original\s*>" "<TrackMixName=$1dub>"
 #
 # Instrumental Mix original >> instrumental
-regexpreplace "<TrackMixName=([^>]*)Instrumental Mix original\s*+>" "<TrackMixName=$1instrumental>"
+# regexpreplace "<TrackMixName=([^>]*)Instrumental Mix original\s*+>" "<TrackMixName=$1instrumental>"
 #
 # Remix original >> remix
-regexpreplace "<TrackMixName=([^>]*)Remix original\s*>" "<TrackMixName=$1 remix>"
+# regexpreplace "<TrackMixName=([^>]*)Remix original\s*>" "<TrackMixName=$1 remix>"
 #
 # Remix >> remix
-regexpreplace "<TrackMixName=([^>]*)Remix\s*>" "<TrackMixName=$1remix>"
+# regexpreplace "<TrackMixName=([^>]*)Remix\s*>" "<TrackMixName=$1remix>"
 
 
 replace " feat. " ", feat. "
@@ -136,12 +136,11 @@ saynewline
 findinline "<<endTrack>>" 1 1
 while "<<nextTrack>>" 99
 
+# debug "on"  "c:\Traxsource track search debug index.html" 20
 #######################
 
 [ParserScriptAlbum]=...
 
-#DebugWriteInput "c:\debug-input.out"
-#debug "on"  "c:\Traxsource track search debug index.html" 20
 
 findline "<!DOCTYPE html>"
 joinuntil "</html>"
@@ -152,7 +151,7 @@ unspace
 regexpreplace "<meta property=\"og:image\" content=\"([^\"]*)\">"  "<AlbumImageURL=$1>"
 regexpreplace "<meta property=\"og:url\" content=\"https:\/\/www\.traxsource\.com\/track\/([^\"]*)\/[^\"]*\">" "<TrackTrackID2=$1>"
 regexpreplace "\"@id\": \"https:\/\/www\.traxsource\.com\/title\/([^\"]*)\/[^\"]*\"" "<TrackTitleID2=$1>"
-regexpreplace "<td class=\"det ellip\"><a href=\"([^\"]*)\" title=\"([^\"]*)\">([^<]*)<\/a>" "<AlbumURL=$1> <AlbumName=$3>"
+regexpreplace "<div class=\"ttl-info ellip\">Release: <a href=\"([^\"]*)\" title=\"([^\"]*)\">([^<]*)<\/a> <\/div>" "<AlbumURL=$1> <AlbumName=$3>"
 
 # regexpreplace "<a href=\"(\/title\/[^\"]*)\" title=\"([^\"]*)">([^<]*)<\/a>" "<AlbumURL=$1> <Albumname=$3>"
 
@@ -169,7 +168,7 @@ regexpreplace "<td>Genre:<\/td><td class=\"det\"><a href=\"[^\"]*\">([^<]*)<\/a>
 regexpreplace "<td>Released:<\/td><td class=\"det\">([^<]*)<\/td>" "<TrackDate=$1>"
 regexpreplace "<td>Released:<\/td><td class=\"det\"><span class='pre-ord-txt'>Pre-order for\s+([^<]*)<\/span><\/td>" "<TrackDate=$1>"
 regexpreplace "<div class=\"trk-cell r-date\"><span class='pre-ord-txt'>Pre-order for\s+([^<]*)<\/span><\/div>" "<TrackDate=$1>"
-regexpreplace "class=\"com-buy\" data-cart=\"\{title_id: ([^,]*), track_id: ([^\}]*)\}\"\s+title=\"Add to Cart\"><span class=\"price\">([^<]*)<\/span>" "<TrackTitleID1=$1> <TrackTrackID1=$2> <TrackPrice=$3>"
+regexpreplace "class=\"com-buy\" data-cart=\"\{title_id: ([^,]*), track_id: ([^\}]*)\}\"" "<TrackTitleID1=$1> <TrackTrackID1=$2>"
 
 regexpreplace "<TrackMixName=\s*>" "<TrackMixName=>"
 regexpreplace "<TrackMixName=([^>]+)\s*>" "<TrackMixName=$1>"
@@ -279,8 +278,6 @@ sayregexp "(?<=<TrackTitleID1=)[^>]*"
 IfNotOutput "TRAXSOURCE_TITLEID"
 sayregexp "(?<=<TrackTitleID2=)[^>]*"
 endif
-outputto "TRAXSOURCE_TRACKPRICE"
-sayregexp "(?<=<TrackPrice=)[^>]*"
 outputto "COVERURL"
 sayregexp "(?<=<AlbumURL=)[^>]*"
 outputto "ALBUM"
@@ -299,7 +296,6 @@ say "(Traxsourced)"
 # set "ARTIST"
 # set "TRAXSOURCE_TITLEID"
 # set "TRAXSOURCE_TRACKID"
-# set "TRAXSOURCE_TRACKPRICE"
 # set "BPM"
 # set "COMMENT"
 # set "COMPILATION"
