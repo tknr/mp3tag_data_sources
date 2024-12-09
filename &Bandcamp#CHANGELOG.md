@@ -1,5 +1,9 @@
 # Changelog — Bandcamp Tag Source for Mp3tag
 
+## 0.4.3 (2024-05-24) @Florian
+
+- Added support for cover thumbnails in search results.
+
 ## 0.4.2 (2023-09-17) @Florian
 
 - Added support for cover thumbnails in search results (macOS-only).

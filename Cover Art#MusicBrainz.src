@@ -6,6 +6,7 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2024-05-13] v1.04 NEW: added support for cover thumbnails in list of query results. 
 # [2020-01-13] v1.03 CHG: changed to use multi-field search option in SearchBy
 #                    FIX: release type was not parsed anymore
 # [2019-10-18] v1.02 FIX: adapted to new response format.
@@ -20,7 +21,7 @@
 [IndexUrl]=http://musicbrainz.org/ws/2/release/?limit=50&query=
 [AlbumUrl]=http://musicbrainz.org/ws/2/release/
 [WordSeparator]=+
-[IndexFormat]=%_preview%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
+[IndexFormat]=%_preview%|%_coverurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
 [SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$if(%artist%,$regexp(%artist%,'[+!(){}\[\]^"~*?:\\]',),)||%20AND%20artist:%28%s%29
 [UserAgent]=1
 [Encoding]=url-utf-8
@@ -38,6 +39,12 @@ do
 	# Preview
 	say "http://musicbrainz.org/release/"
 	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	say "|"
+
+	# Cover Preview
+	say "https://coverartarchive.org/release/"
+	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	say "/front-250"
 	say "|"
 
 	# URL

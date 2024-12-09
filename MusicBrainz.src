@@ -6,6 +6,7 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2024-05-08] v1.13 NEW: added support for cover thumbnails in list of query results. 
 # [2022-10-03] v1.12 FIX: issue with artist names containing vertical bar character.
 # [2022-04-13] v1.11 FIX: issue when parsing joinphrases
 # [2022-03-23] v1.10 NEW: added fields BARCODE, CATALOGNUMBER, ISRC, and MUSICBRAINZ_ALBUMRELEASECOUNTRY.
@@ -31,7 +32,7 @@
 [IndexUrl]=http://musicbrainz.org/ws/2/release/?limit=50&query=
 [AlbumUrl]=http://musicbrainz.org/ws/2/release/
 [WordSeparator]=+
-[IndexFormat]=%_preview%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
+[IndexFormat]=%_preview%|%_coverurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
 [SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$if(%artist%,$regexp(%artist%,'[+!(){}\[\]^"~*?:\\]',),)||%20AND%20artist:%28%s%29
 [UserAgent]=1
 [Encoding]=url-utf-8
@@ -49,6 +50,12 @@ do
 	# Preview
 	say "http://musicbrainz.org/release/"
 	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	say "|"
+
+	# Cover Preview
+	say "http://coverartarchive.org/release/"
+	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	say "/front-250"
 	say "|"
 
 	# URL

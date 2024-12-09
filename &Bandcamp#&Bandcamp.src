@@ -12,10 +12,10 @@
 #[SearchBy]=$if($eql(%albumartist%,'Various Artists'),$regexp(%album%,'\s+\[.+\]$',,1),$regexp(%albumartist%,'\s+\[.+\]$',,1))
 [SearchBy]=$regexp(%album%,'\s+\[.+\]$',,1)
 [Encoding]=url-utf-8
-[Settings]=Bandcamp#Settings.settings
+[Settings]=&Bandcamp#Settings.settings
 [MinAppVersionWin]=3.22
 [MinAppVersionMac]=1.8.6
-[Version]=0.4.2
+[Version]=0.4.3
 
 [ParserScriptIndex]=...
 # ###################################################################
@@ -38,7 +38,7 @@ do
 		#replace ">ALBUM<" ">album<"
 
 		# Cover URL
-			sayregexp "(?<=div class=\"art\"><img src\=\")(.+?)(?=\">)" ", " "</li>"
+			sayregexp "(?<=div class=\"art\"><img src\=\").+?(?=\">)" ", " "</li>"
 			say "|"
 		
 		# Type
@@ -75,7 +75,7 @@ do
 			regexpreplace "subhead\">from.*?by" "subhead\">by"
 			
 			# Cover URL
-				sayregexp "(?<=div class=\"art\"><img src\=\")(.+?)(?=\">)" ", " "</li>"
+				sayregexp "(?<=div class=\"art\"><img src\=\").+?(?=\">)" ", " "</li>"
 				say "|"
 
 			# Type
@@ -166,7 +166,7 @@ SayRest
 OutputTo "GENRE"
 json_select_object "publisher"
 json_select "genre"
-RegexpReplace "https://bandcamp.com/discover/(.+?)" "$1"
+RegexpReplace "https://bandcamp.com/tag/(.+?)" "$1"
 SayRest
 json_unselect_object
 

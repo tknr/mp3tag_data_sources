@@ -7,6 +7,14 @@
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.97b or above.
 #
+# [2024-05-19] v1.13 NEW: added support for importing BARCODE.
+#                    NEW: added support for importing ALBUMARTISTSORT.
+#                    CHG: CATALOGNUMBER set to `none` is now ignored.
+#                    CHG: multiple media per release are now separated by comma.
+#                    FIX: further improvements at detecting implicit artists for subtracks.
+# [2024-05-15] v1.12 FIX: further improvements at detecting implicit artists for subtracks.
+# [2024-05-08] v1.11 FIX: subtracks with implicit artist from index track were not identified correctly.
+#                    FIX: comma used as join separator had extra whitespace prefix.
 # [2022-03-22] v1.10 CHG: renamed CATALOGID to CATALOGNUMBER to improve compatibility with other software.
 # [2019-11-09] v1.09 CHG: changed to use double pipe symbol as search-by delimiter.
 # [2019-09-09] v1.08 CHG: added descriptive syntax for SearchBy parameter.
@@ -84,18 +92,41 @@ endif
 
 # Catalog Number
 outputto "CATALOGNUMBER"
-json_select_many "labels" "catno" ", "
-sayrest
+json_foreach "labels"
+	json_select "catno"
+	ifnot "none"
+		ifoutput "CATALOGNUMBER"
+			say ", "
+		endif
+		sayrest
+	endif
+json_foreach_end
 
 # Publisher
 outputto "PUBLISHER"
 json_select_many "labels" "name" ", "
 sayrest
 
+# Barcode Number
+outputto "BARCODE"
+json_foreach "identifiers"
+	json_select "type"
+	if "Barcode"
+		json_select "value"
+		ifnotoutput "BARCODE"
+			regexpreplace "\D" ""
+			sayrest
+		endif
+	endif
+json_foreach_end
+
 # Media Type
 outputto "MEDIATYPE"
 json_foreach "formats"
 	json_select "name"
+	ifoutput "MEDIATYPE"
+		say ", "
+	endif
 	sayrest
 	json_select_array "descriptions" -1 ", "
 	ifnot ""
@@ -132,30 +163,34 @@ outputto "WWW"
 json_select "uri"
 sayrest
 
+# Sortkey
+outputto "ALBUMARTISTSORT"
+json_select "artists_sort"
+sayrest
+
+# Artist or Albumartist
 set "TEMP_Join"
 outputto "TEMP_Artist"
 json_foreach "artists"
 	sayoutput "TEMP_Join"
 	set "TEMP_Join"
 	json_select "anv"
-	ifnot ""
-		sayrest
-	else
+	if ""
 		json_select "name"
-		sayrest
 	endif
-
+	sayrest
 	outputto "TEMP_Join"
 	json_select "join"
 	ifnot ""
-		say " "
+		ifnot ","
+			say " "
+		endif
 		sayrest
 		say " "
 	endif
 	outputto "TEMP_Artist"
 json_foreach_end
 
-# Artist or Albumartist
 json_foreach "tracklist"
 	json_select_many "artists" "name" ", "
 json_foreach_end
@@ -163,22 +198,51 @@ json_foreach_end
 ifnot ""
 	## Various Artists
 	outputto "ALBUMARTIST"
-else
-	## Single Artist
-	outputto "ARTIST"
+	sayoutput "TEMP_Artist"
 endif
-sayoutput "TEMP_Artist"
 
 # Tracks
 json_foreach "tracklist"
 	json_select "type_"
-	
+
 	if "index"
 		json_select "title"
 		set "TEMP_IndexTitle"
 		outputto "TEMP_IndexTitle"
 		sayrest
 		say ", "
+
+		set "TEMP_IndexArtist"
+		json_select_many "artists" "name" ", "
+		ifnot ""
+			outputto "TEMP_IndexArtist"
+			set "TEMP_Join"
+			json_foreach "artists"
+				sayoutput "TEMP_Join"
+				set "TEMP_Join"
+				json_select "anv"
+				ifnot ""
+					sayrest
+				else
+					json_select "name"
+					sayrest
+				endif
+
+				outputto "TEMP_Join"
+				json_select "join"
+				ifnot ""
+					ifnot ","
+						say " "
+					endif
+					sayrest
+					say " "
+				endif
+				outputto "TEMP_IndexArtist"
+			json_foreach_end
+		else
+			outputto "TEMP_IndexArtist"
+			sayoutput "TEMP_Artist"
+		endif
 
 		json_foreach "sub_tracks"
 			json_select "type_"
@@ -236,14 +300,19 @@ json_foreach "tracklist"
 						outputto "TEMP_Join"
 						json_select "join"
 						ifnot ""
-							say " "
+							ifnot ","
+								say " "
+							endif
 							sayrest
 							say " "
 						endif
 						outputto "ARTIST"
 					json_foreach_end
-					say "|"
+				else
+					outputto "ARTIST"
+					sayoutput "TEMP_IndexArtist"
 				endif
+				say "|"
 			endif
 		json_foreach_end
 	endif
@@ -301,17 +370,21 @@ json_foreach "tracklist"
 				outputto "TEMP_Join"
 				json_select "join"
 				ifnot ""
-					say " "
+					ifnot ","
+						say " "
+					endif
 					sayrest
 					say " "
 				endif
 				outputto "ARTIST"
 			json_foreach_end
-			say "|"
+		else
+			outputto "ARTIST"
+			sayoutput "TEMP_Artist"
 		endif
+		say "|"
 	endif
 json_foreach_end
-
 
 outputto "Title"
 sayoutput "TEMP_Title"
@@ -320,6 +393,7 @@ outputto "Track"
 sayoutput "TEMP_Track"
 
 set "TEMP_Artist"
+set "TEMP_IndexArtist"
 set "TEMP_IndexTitle"
 set "TEMP_Join"
 set "TEMP_Title"
