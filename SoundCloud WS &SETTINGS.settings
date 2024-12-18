@@ -1,0 +1,75 @@
+{
+  "key": "SettingSoundcloud",
+  "title": "SoundCloud WS Settings",
+  "settings": [
+    {
+      "type": "heading",
+      "key": "HeadingDisableFields",
+      "title": "Disable fields"
+    },
+    { 
+      "type": "bool",
+      "key": "SettingParseTitle",
+      "title": "Parse TITLE",
+      "description": "Check to enable output to TITLE Field",
+      "default": true
+    },
+    { 
+      "type": "bool",
+      "key": "SettingParseCoverImage",
+      "title": "Parse COVER IMAGE",
+      "description": "Check to enable output to COVERURL Field",
+      "default": true
+    },
+    { 
+      "type": "bool",
+      "key": "SettingParseArtist",
+      "title": "Parse ARTIST (Uploader)",
+      "description": "Check to enable output to ARTIST Field",
+      "default": true
+    },
+    { 
+      "type": "bool",
+      "key": "SettingParseGenre",
+      "title": "Parse GENRE",
+      "description": "Check to enable output to GENRE Field",
+      "default": true
+    },
+    { 
+      "type": "bool",
+      "key": "SettingParseYear",
+      "title": "Parse YEAR",
+      "description": "Check to enable output to YEAR Field",
+      "default": true
+    },
+    {
+      "type": "string",
+      "key": "SettingFormatYear",
+      "title": "YEAR Format",
+      "description": "Choose prefered Date format for YEAR field",
+      "choices": [
+        "YYYY",
+        "YYYY-MM-DD",
+        "DD-MM-YYYY"
+      ],
+      "default": "YYYY"
+    }
+  ],
+  "localizations": {
+    "de": [
+      {
+      "key": "SettingSoundcloud",
+      "title": "SoundCloud WS Einstellungen"
+      },
+      {
+        "key": "HeadingDisableFields",
+        "title": "Felder deaktivieren"
+      },
+      {
+        "key": "SettingFormatYear",
+        "title": "YEAR Format",
+        "description": "Wähle das Datums format für das YEAR feld"
+      }
+    ]
+  }
+}
