@@ -1,2 +1,2 @@
 ﻿[SearchBy]= $trim($regexp($regexp($regexp(%_directory%,'\b-\b|_', ),'(?i)\[.*\]|cd\s*\d*|[^\s]+\.com|\bep\b|feat\.|ft\.|\bom\b|\boriginal\b|\bclub\b|\bmix\b|\bremix\b|\bthe\b|vinyl|web|www[^\s]+|[^\w\s]|\b&*amp|\b(various artists|v\.?a\.?)\b',),'\s+', ))
-[Include]=Traxsource Release Search by Will Remainunknown.inc
+[Include]=Traxsource#Release Search by Will Remainunknown.inc

@@ -1,2 +1,2 @@
 ﻿[SearchBy]= $trim($regexp($regexp(%artist%,'\b featuring \b|\b feat \b|\b, feat. \b|\b presents \b|\b pres \b|\b and \b|\b & \b|\s+|\b vs \b', ),'&',))
-[Include]=Traxsource Track Search by Will Remainunknown.inc
+[Include]=Traxsource#Track Search by Will Remainunknown.inc
