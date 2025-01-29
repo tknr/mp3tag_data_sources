@@ -167,7 +167,7 @@ SayRest
 OutputTo "GENRE"
 json_select_object "publisher"
 json_select "genre"
-RegexpReplace "https://bandcamp.com/tag/(.+?)" "$1"
+RegexpReplace "https://bandcamp.com/discover/(.+?)" "$1"
 SayRest
 json_unselect_object
 
