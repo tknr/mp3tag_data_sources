@@ -1,0 +1,139 @@
+﻿# ##################################################################
+#            junodownload.com WSS v0.beta by stevehero             #
+#                           2022.08.23                             #
+# ##################################################################
+
+#-------------------------------------------------------------------------------------------#
+[Name]=junodownload.com
+[BasedOn]=https://www.junodownload.com
+[AlbumUrl]=
+[SearchBy]=%www%
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
+[ParserScriptAlbum]=...
+
+# debug "on" "debug "on" "C:\Users\stevehero\Desktop\JUNO_ALBUM_DEBUG.html""
+
+# WWW
+outputto "WWW"
+sayoutput "CurrentUrl"
+
+# JUNO_RELEASE_ID
+outputto "JUNO_RELEASE_ID"
+findline "<meta property=\"og:url\""
+findinline "content=\""
+unspace
+regexpreplace "<[^>]+\/(.+)(\/\".*$)" "$1"
+sayrest
+
+# COVERURL
+outputto "COVERURL"
+gotoline 1
+findline "<meta property=\"og:image\"" 1 1
+findinline "content=\"" 1 1
+sayuntil "\""
+
+# <title>Nothing Inside by Sander van Doorn/Mayaeni on MP3, WAV, FLAC, AIFF & ALAC at Juno Download</title>
+# ALBUM
+outputto "ALBUM"
+gotoline 1
+findline "<title>" 1 1
+regexpreplace "(<title>.+)\sby\s[^<]+" "$1"
+findinline "<title>" 1 1
+sayuntil "<"
+
+# <meta property="og:title" content="Buy Nothing Inside by Sander van Doorn/Mayaeni on MP3, WAV, FLAC, AIFF & ALAC at Juno Download" />
+# ARTIST
+outputto "ARTIST"
+gotoline 1
+findline "<meta property=\"og:title\"" 1 1
+regexpreplace "(content=\")Buy.+\sby\s(.+)\son\sMP3[^\"]+" "$1$2"
+findinline "content=\"" 1 1
+sayuntil "\""
+
+# itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Doorn"
+# PUBLISHER
+outputto "PUBLISHER"
+gotoline 1
+findline "<div class=\"container-fluid\"" 1 1
+findinline "itemprop=\"publisher\"" 1 1
+FindInLine "content=\"" 1 1
+sayuntil "\""
+
+# Cat:</strong>&nbsp;190296 636677<br>
+# CATALOG
+outputto "CATALOG #"
+gotoline 1
+findline "<div class=\"container-fluid\"" 1 1
+findinline "Cat:</strong>" 1 1
+findinline ";" 1 1
+sayuntil "<"
+
+# "datePublished">12 October, 2021<
+# YEAR
+outputto "YEAR"
+regexpreplace "\s*January[\s,]*" "-01-"
+regexpreplace "\s*February[\s,]*" "-02-"
+regexpreplace "\s*March[\s,]*" "-03-"
+regexpreplace "\s*April[\s,]*" "-04-"
+regexpreplace "\s*May[\s,]*" "-05-"
+regexpreplace "\s*June[\s,]*" "-06-"
+regexpreplace "\s*July[\s,]*" "-07-"
+regexpreplace "\s*August[\s,]*" "-08-"
+regexpreplace "\s*September[\s,]*" "-09-"
+regexpreplace "\s*October[\s,]*" "-10-"
+regexpreplace "\s*November[\s,]*" "-11-"
+regexpreplace "\s*December[\s,]*" "-12-"
+regexpreplace "(\d\d?)-(\d\d)-(\d{4})" "$3-$2-$1"
+findline "<div class=\"container-fluid\"" 1 1
+findinline "\"datePublished\">" 1 1
+sayuntil "<"
+
+# Leave this directly after YEAR
+outputto "MONTH_DAY"
+movechar -5
+saynextnumber
+movechar 1
+saynextnumber
+
+# GENRE
+outputto "GENRE"
+gotoline 1
+findline "<div class=\"container-fluid\"" 1 1
+findinline ">Genre:<" 1 1
+findinline "/\">" 1 1
+sayuntil "<"
+
+# TRACKS LOOP
+gotoline 1
+findline "<div class=\"container-fluid\"><div id=\"topbar_bread\"" 1 1 # Find the very start where the tracks begin
+
+do
+
+  findinline "<div class=\"row gutters-sm align-items-center product-tracklist-track\"" # This should be the same as the while below
+
+  outputto "TITLE"
+  sayregexp "(?<=itemprop=\"name\">).+?(?=<)" "|" "" # TITLE
+
+  outputto "TRACK"
+  sayregexp "(?<=track_number=).+?(?=\")" "|" "" # TITLE
+
+  outputto "BPM"
+  sayregexp "(?<=d-lg-block text-center\">)\d+?(?=<)" "|" "" # TITLE
+
+  outputto "_LENGTH"
+  sayregexp "\\d+:\\d+(?!=<meta itemprop=\"duration\")" "|" ""
+
+  saynewline
+  findinline " itemprop=\"track\"" 1 1 # The exact string after the while part
+
+while "<div class=\"row gutters-sm align-items-center product-tracklist-track\"" 99
+
+set "TYPE" "WEB"
+set "MONTH_DAY"
+
+# TYPICAL TRACK FORMAT - ONLY FOR MY OWN USE FOR FUTURE DEBUGGING
+# <div class="row gutters-sm align-items-center product-tracklist-track"
+#  itemprop="track" itemscope itemtype="http://schema.org/MusicRecording"><div class="col track-title">1.&nbsp;<a itemprop="url" href="/products/sander-van-doorn-mayaeni-nothing-inside/5301492-02/?track_number=1"><span id="title-5301492--01" itemprop="name">Nothing Inside</span></a></div><div class="col-1 d-none d-lg-block text-center">05:49<meta itemprop="duration" content="P0H5M49S" /></div><div class="col-1 d-none d-lg-block text-center">126</div><div class="col-5 col-sm-auto text-right track-actions"><button type="button" class="btn btn-secondary btn-xs mr-lg-3" id="5301492-02"onclick="show_pl_context_menu(event,{ title_id: '5301492', product_id: '02', track_number: '01', class_id: '2', div_id: 'pl_track_cm' });"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></button><div class="d-inline-block track-buy mt-2 mt-sm-0" id="buy_track_1">&#128;2.08</div></div></div><div class="row gutters-sm align-items-center product-tracklist-track"
+#  itemprop="track" itemscope itemtype="http://schema.org/MusicRecording"><div class="col track-title">2.&nbsp;<a itemprop="url" href="/products/sander-van-doorn-mayaeni-nothing-inside/5301492-02/?track_number=2"><span id="title-5301492--02" itemprop="name">Nothing Inside (radio edit)</span></a></div><div class="col-1 d-none d-lg-block text-center">03:27<meta itemprop="duration" content="P0H3M27S" /></div><div class="col-1 d-none d-lg-block text-center">126</div><div class="col-5 col-sm-auto text-right track-actions"><button type="button" class="btn btn-secondary btn-xs mr-lg-3" id="5301492-02"onclick="show_pl_context_menu(event,{ title_id: '5301492', product_id: '02', track_number: '02', class_id: '2', div_id: 'pl_track_cm' });"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></button><div class="d-inline-block track-buy mt-2 mt-sm-0" id="buy_track_2">&#128;2.08</div></div></div><div class="row gutters-sm align-items-center product-tracklist-track"
+#  itemprop="track" itemscope itemtype="http://schema.org/MusicRecording"><div class="col track-title">3.&nbsp;<a itemprop="url" href="/products/sander-van-doorn-mayaeni-nothing-inside/5301492-02/?track_number=3"><span id="title-5301492--03" itemprop="name">Nothing Inside (Julian Jordan remix)</span></a></div><div class="col-1 d-none d-lg-block text-center">07:39<meta itemprop="duration" content="P0H7M39S" /></div><div class="col-1 d-none d-lg-block text-center">126</div><div class="col-5 col-sm-auto text-right track-actions"><button type="button" class="btn btn-secondary btn-xs mr-lg-3" id="5301492-02"onclick="show_pl_context_menu(event,{ title_id: '5301492', product_id: '02', track_number: '03', class_id: '2', div_id: 'pl_track_cm' });"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></button><div class="d-inline-block track-buy mt-2 mt-sm-0" id="buy_track_3">&#128;2.08</div></div></div><div class="row gutters-sm align-items-center product-tracklist-track"
+#  itemprop="track" itemscope itemtype="http://schema.org/MusicRecording"><div class="col track-title">4.&nbsp;<a itemprop="url" href="/products/sander-van-doorn-mayaeni-nothing-inside/5301492-02/?track_number=4"><span id="title-5301492--04" itemprop="name">Nothing Inside (Adam F remix)</span></a></div><div class="col-1 d-none d-lg-block text-center">03:46<meta itemprop="duration" content="P0H3M46S" /></div><div class="col-1 d-none d-lg-block text-center">89</div><div class="col-5 col-sm-auto text-right track-actions"><button type="button" class="btn btn-secondary btn-xs mr-lg-3" id="5301492-02"onclick="show_pl_context_menu(event,{ title_id: '5301492', product_id: '02', track_number: '04', class_id: '2', div_id: 'pl_track_cm' });"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></button><div class="d-inline-block track-buy mt-2 mt-sm-0" id="buy_track_4">&#128;2.08</div></div></div><div class="row gutters-sm
