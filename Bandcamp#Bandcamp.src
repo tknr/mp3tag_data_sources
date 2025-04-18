@@ -11,7 +11,7 @@
 [IndexFormat]=%_coverurl%|%Type%|%_url%|%Album%|%Artist%|%Date%
 #[SearchBy]=$if($eql(%albumartist%,'Various Artists'),$regexp(%album%,'\s+\[.+\]$',,1),$regexp(%albumartist%,'\s+\[.+\]$',,1))
 #[SearchBy]=$regexp(%album%,'\s+\[.+\]$',,1)
-[SearchBy]=$regexp(%album%,'\s+\[.+\]$',,1) $regexp(%albumartist%,'\s+\[.+\]$',,1)
+[SearchBy]=$regexp(%album%,'\s+\[.+\]$',,1) $regexp(%artist%,'\s+\[.+\]$',,1) $regexp(%albumartist%,'\s+\[.+\]$',,1)
 [Encoding]=url-utf-8
 [Settings]=Bandcamp#Settings.settings
 [MinAppVersionWin]=3.22
