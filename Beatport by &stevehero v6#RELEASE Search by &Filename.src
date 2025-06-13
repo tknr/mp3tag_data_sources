@@ -12,17 +12,17 @@
 #                       | |                        __/ |
 #                       |_|                       |___/
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
-#                                 .:: [v5.12 by stevehero™] [2021.06.08] ::.                              #
-# https://community.mp3tag.de/t/beatport-com-wss-by-stevehero-release-single-track-artwork-tagging/12568  #
+#                             .::  [v6.007 by stevehero™] [2024.10.08] ::.                                #
+#  https://community.mp3tag.de/t/ws-beatport-com-by-stevehero-release-single-track-artwork-tagging/12568  #
 #                          .:: Please read the 'Version History + Readme' file ::.                        #
 #                    .:: DO NOT COPY/MODIFY OR REDISTRIBUTE THIS WITHOUT PERMISSION ::.                   #
-#                 .:: This file should be stored in your tag sources sources directory ::.                #
+#                .:: This file should be stored in your tag sources, sources directory ::.                #
 #                                      %APPDATA%\Mp3tag\data\sources                                      #
-#                                  and requires Mp3tag v3.03d or above.                                   #
+#                          and requires Mp3tag v3.26 [Win] / 1.8.4 [Mac] or above                         #
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
-#                          .:: You can buy me a beer or an EP on beatport ::.                             #
-#     https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EZVJN8ZLEU8KC&source=url       #
+#               .:: You can buy me a 🍺, 🍔 or an EP on beatport with the link below ::.                 #
+#                                    https://revolut.me/stephen147                                        #
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
 
-[SearchBy]=TRACK Search by Filename||$trim($regexp($regexp($regexp(%_filename%,'\b-\b|_', ),'(?i)\[.*\]|cd\s*\d*|[^\s]+\.com|\bep\b|feat\.|ft\.|\bom\b|\boriginal\b|\bclub\b|\bmix\b|\bremix\b|\bthe\b|vinyl|web|www[^\s]+|[^\w\s]|\b&*amp|\b(various artists|v\.?a\.?)\b',),'\s+', ))||+%s&per-page=100
-[Include]=Beatport by &stevehero v5.0_Track Search.inc
+[SearchBy]=RELEASE Search by Filename||$trim($regexp($regexp($regexp(%_filename%,'\b-\b|_', ),'(?i)\[.*\]|cd\s*\d*|[^\s]+\.com|\bep\b|feat\.|ft\.|\bom\b|\boriginal\b|\bclub\b|\bmix\b|\bremix\b|\bthe\b|vinyl|web|www[^\s]+|[^\w\s]|\b&*amp|\b(various artists|v\.?a\.?)\b',),'\s+', ))||+%s
+[Include]=Beatport by &stevehero v6_Release Search.inc
