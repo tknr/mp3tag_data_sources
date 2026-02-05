@@ -1,0 +1,24 @@
+# Mp3tag (2.38 or higher) Parsing for Last.fm by dano
+# Save it in your Mp3tag data directory, 
+# e.g. C:\Documents and Settings\*username*\Application Data\Mp3tag\data\sources
+#
+#	DO NOT COPY/MODIFY AND REDISTRIBUTE THIS WITHOUT PERMISSION
+#
+#
+[Name]=Last.fm Artist Picture (Small)
+[BasedOn]=www.last.fm
+[AlbumUrl]=http://ws.audioscrobbler.com/1.0/artist/%s/similar.xml
+[WordSeperator]=+
+[SearchBy]=%artist%
+[Encoding]=url-utf-8
+
+[ParserScriptAlbum]=...
+# ###################################################################
+#					A  L  B  U  M
+# ###################################################################
+#debug "on" "C:\debug_Last.fm-Artist-SimilarArtists_B.html" "20"
+
+findline "picture="
+outputto "coverurl"
+findinline "picture=\""
+sayuntil "\""

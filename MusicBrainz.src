@@ -6,6 +6,10 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2025-11-05] v1.15 CHG: complete rewrite to use JSON input instead of XML.
+#                    CHG: media title is now imported to SETSUBTITLE (instead of Disc Title).
+#                    NEW: added fields COMPILATION, MUSICBRAINZ_ALBUMTYPE, and ORIGYEAR.
+# [2025-05-19] v1.14 FIX: schema change resulted in track numbers not being imported correctly.
 # [2024-05-08] v1.13 NEW: added support for cover thumbnails in list of query results. 
 # [2022-10-03] v1.12 FIX: issue with artist names containing vertical bar character.
 # [2022-04-13] v1.11 FIX: issue when parsing joinphrases
@@ -29,8 +33,8 @@
 
 [Name]=MusicBrainz
 [BasedOn]=musicbrainz.org
-[IndexUrl]=http://musicbrainz.org/ws/2/release/?limit=50&query=
-[AlbumUrl]=http://musicbrainz.org/ws/2/release/
+[IndexUrl]=https://musicbrainz.org/ws/2/release/?fmt=json&limit=50&query=
+[AlbumUrl]=https://musicbrainz.org/ws/2/release/
 [WordSeparator]=+
 [IndexFormat]=%_preview%|%_coverurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
 [SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$if(%artist%,$regexp(%artist%,'[+!(){}\[\]^"~*?:\\]',),)||%20AND%20artist:%28%s%29
@@ -42,72 +46,97 @@
 #					I  N  D  E  X
 # ###################################################################
 
-findline "<release-list"
-joinuntil "</release-list>"
 replace "|" "$verticalBar()"
+json "ON" "current"
+Trim "off"
 
-do
+json_foreach "releases"
+	
 	# Preview
-	say "http://musicbrainz.org/release/"
-	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	json_select "id"
+	say "https://musicbrainz.org/release/"
+	sayrest
 	say "|"
 
 	# Cover Preview
+	json_select "id"
 	say "http://coverartarchive.org/release/"
-	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	sayrest
 	say "/front-250"
 	say "|"
 
 	# URL
-	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
-	say "?inc=artists+artist-credits+labels+recordings+release-groups+isrcs"
+	json_select "id"
+	sayrest
+	say "?inc=artists+artist-credits+labels+recordings+release-groups+isrcs&fmt=json"
 	say "|"
 
 	# Score
-	findinline ":score=\""
-	sayuntil "\""
+	json_select "score"
+	sayrest
 	say "|"
 
 	# Type
-	sayregexp "(?<=\">)[^<]+(?=</primary-type>)" ", " "</release-group>"
+	json_select_object "release-group"
+	json_select "primary-type"
+	sayrest
+	json_unselect_object
 	say "|"
 
 	# Artist
-	sayregexp "(?<=<name>)[^<]+(?=</name><a)" ", " "</artist-credit>"
-	say "|"
+	json_select_object "artist-credit"
+	json_foreach "artist-credit"
+		json_select "name"
+		sayrest
+		json_select "joinphrase"
+		ifnot ""
+			sayrest
+		endif
+	json_foreach_end
+    json_unselect_object
+    say "|"
 
-	# Album
-	findinline "<title>"
-	sayuntil "</title>"
+    # Album
+	json_select "title"
+	sayrest
 	say "|"
 
 	# Tracks
-	sayregexp "(?<=<track-list count=\")\d+(?=\")" ", " "</release>"
+	json_select "track-count"
+	sayrest
 	say "|"
 
 	# Year
-	sayregexp "(?<=release-group><date>)[-0-9]{4,10}(?=</date>)" ", " "</release>"
+	json_select "date"
+	sayrest
 	say "|"
 
 	# Country
-	sayregexp "(?<=country>)[^<]+(?=<)" ", " "</release>"
+	json_select "country"
+	sayrest
 	say "|"
 
 	# Format
-	sayregexp "(?<=format>)[^<]+(?=<)" ", " "</release>"
+	json_select_many "media" "format" ", "
+	sayrest
 	say "|"
 
 	# Label
-	sayregexp "(?<=<name>)[^<]+(?=</name></label>)" ", " "</release>"
+	json_select_array "label-info" 1
+	json_select_object "label"
+	json_select "name"
+	sayrest
+	json_unselect_object
 	say "|"
 
 	# Catalog-number
-	sayregexp "(?<=catalog-number>)[^<]+(?=<)" ", " "</release>"
+	json_select "catalog-number"
+	json_unselect_object
+	sayrest
+
 	saynewline
 
-	findinline "</release>"
-while "<release "
-
+json_foreach_end
 
 [ParserScriptAlbum]=...
 # ###################################################################
@@ -115,320 +144,274 @@ while "<release "
 # ###################################################################
 
 replace "|" "$verticalBar()"
-
-joinuntil "</metadata>"
+json "ON" "current"
+Trim "off"
 
 # MusicBrainz Album ID
 outputto "MUSICBRAINZ_ALBUMID"
-sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\")" ", " "<title>"
+json_select "id"
+sayrest
 
 # Album
-outputto "Album"
-findinline "<title>"
-sayuntil "</title>"
+outputto "ALBUM"
+json_select "title"
+sayrest
 
-# AlbumArtist
-outputto "Albumartist"
-findinline "<artist-credit><name-credit"
-if " joinphrase"
-	regexpreplace "<name-credit joinphrase=\"([^>]+?)\">(<artist id=\".+?\">)(<name>)(.+?)(</name>)" "<name-credit$2$3$4$1$5"
-	regexpreplace "<name-credit joinphrase=\"([^>]+?)\">(<name>)(.+?)(</name>)" "<name-credit$2$3$1$4"
-	findinline "<artist-credit>"
+# AlbumArtist, AlbumArtistSort, MusicBrainz Album Artist ID
+json_select_object "release-group"
 
-	do
-		findinline "<name-credit"
-		if ">"
-			findinline "<name>"
-			sayregexp "[^<]+(?=<)" "" "/name>"
-		else
-			findinline "<name>"
-			sayregexp "[^<]+(?=<)" "" "/name>"
-			say " "
-		endif
-		
-		findinline "</name-credit>"
-	while "<name-credit" 99
-else
-	findinline "<name>"
-	sayuntil "</name>"
-endif
+json_foreach "artist-credit"
+	outputto "ALBUMARTIST"
+	json_select "name"
+	sayoutput "TEMP_Join"
+	sayrest
 
-# AlbumArtistSort
-outputto "Albumartistsort"
-gotoline 1
-findinline "<artist-credit><name-credit"
-if " joinphrase"
-	findinline "<artist-credit>"
+	json_select_object "artist"
+	
+	outputto "ALBUMARTISTSORT"
+	json_select "sort-name"
+	ifoutput "TEMP_Join"
+		say "; "
+	endif
+	sayrest
 
-	do
-		findinline "<name-credit"
-		if ">"
-			findinline "<sort-name>"
-			sayregexp "[^<]+(?=<)" "" "/sort-name>"
-		else
-			findinline "<sort-name>"
-			sayregexp "[^<]+(?=<)" "" "/sort-name>"
-			say "; "
-		endif
-		
-		findinline "</name-credit>"
-	while "<name-credit" 99
-else
-	findinline "<sort-name>"
-	sayuntil "</sort-name>"
-endif
+	outputto "MUSICBRAINZ_ALBUMARTISTID"
+	json_select "id"
+	ifoutput "TEMP_Join"
+		say ", "
+	endif
+	sayrest
 
-# MusicBrainz Album Artist ID
-outputto "MUSICBRAINZ_ALBUMARTISTID"
-gotoline 1
-findinline "<artist-credit><name-credit"
-sayregexp "(?<=artist id=\")[-0-9a-y]{34,40}(?=\")" " " "</artist-credit>"
+	json_unselect_object
+
+	set "TEMP_Join"
+	outputto "TEMP_Join"
+	json_select "joinphrase"
+	sayrest
+json_foreach_end
+set "TEMP_Join"
 
 # MusicBrainz Release Group ID
 outputto "MUSICBRAINZ_RELEASEGROUPID"
-sayregexp "(?<=release-group id=\")[-0-9a-y]{34,40}(?=\")" ", " "</release-group>"
+json_select "id"
+sayrest
 
-# ASIN
-findinline "<ASIN>" 1 1
-movechar -6
-if "<asin>"
-	outputto "ASIN"
-	movechar 6
-	sayuntil "</asin>"
+# MusicBrainz Album Type and Compilation flag
+outputto "MUSICBRAINZ_ALBUMTYPE"
+json_select "primary-type"
+sayrest
+
+json_select_array "secondary-types" -1 ", "
+ifnot ""
+	say ", "
+    if "Compilation"
+		outputto "COMPILATION"
+		say "1"
+	endif
+
+	outputto "MUSICBRAINZ_ALBUMTYPE"
+	sayrest
 endif
 
-findline "<?xml"
+# Original Release Year
+outputto "ORIGYEAR"
+json_select "first-release-date"
+saynchars 4
+
+json_unselect_object
+
+# ASIN
+outputto "ASIN"
+json_select "asin"
+sayrest
 
 # Cover via CoverArtArchive
-findinline "<artwork>" 1 1
-if "true"
-	findline "<?xml"
-	findinline "<release id=\""
-	outputto "coverurl"
+outputto "coverurl"
+json_select_object "cover-art-archive"
+json_select "front"
+if "1"
 	say "http://coverartarchive.org/release/"
-	sayuntil "\""
+	sayoutput "MUSICBRAINZ_ALBUMID"
 	say "/front"
 else
-#Cover via ASIN
-	findline "<?xml"
-	findinline "<asin>" 1 1
-	movechar -6
-	if "<asin>"
-		outputto "coverurl"
-		movechar 6
+	ifoutput "asin"
 		say "http://images.amazon.com/images/P/"
-		sayuntil "</asin>"
+		sayoutput "asin"
 		say ".01.LZZZZZZZ.jpg"
 	endif
 endif
-
-findline "<?xml"
+json_unselect_object
 
 # Year
-findinline "<release-event>" 1 1
-findinline "<date>" 1 1
-movechar -6
-if "<date>"
-	outputto "Year"
-	findinline "<date>"
-	saynextnumber
-else
-	gotoline 1
-endif
+outputto "YEAR"
+json_select "date"
+sayrest
 
 # Publisher
-findinline "<label id=\"" 1 1
-movechar -11
-if "<label id=\""
-	outputto "Publisher"
-	findinline "<name>"
-	sayuntil "</name>"
-endif
-gotoline 1
+json_foreach "label-info"
+	outputto "CATALOGNUMBER"
+	ifoutput "CATALOGNUMBER"
+		say ", "
+	endif
+	json_select "catalog-number"
+	sayrest
+
+	outputto "PUBLISHER"
+	ifoutput "PUBLISHER"
+		say ", "
+	endif
+	json_select_object "label"
+	json_select "name"
+	sayrest
+	json_unselect_object
+json_foreach_end
 
 # MusicBrainz Album Release Country
-findinline "<country>" 1 1
-movechar -9
-if "<country>"
-	outputto "MUSICBRAINZ_ALBUMRELEASECOUNTRY"
-	movechar 9
-	sayuntil "</country>"	
-endif
-gotoline 1
+outputto "MUSICBRAINZ_ALBUMRELEASECOUNTRY"
+json_select "country"
+sayrest
 
 # Barcode
-findinline "<barcode>" 1 1
-movechar -9
-if "<barcode>"
-	outputto "BARCODE"
-	movechar 9
-	sayuntil "</barcode>"	
-endif
-gotoline 1
-
-# Catalog number
-findinline "<catalog-number>" 1 1	
-movechar -16
-if "<catalog-number>"
-    outputto "CatalogNumber"
-    sayregexp "(?<=catalog-number>)[^<]+(?=<)" ", " "</label-info-list>"
-endif
-gotoline 1
-
-replace "</track-list></medium></medium-list>" ""
-replace "</track-list></medium>" "<track>"
-
-regexpreplace "(<name-credit[^>]*?>)(<name>.+?</name>)(<artist id=\".+?\">)(<name>.+?</name>)" "$1$3$2"
-regexpreplace "<name-credit joinphrase=\"(.+?)\">(<artist id=\".+?\">)(<name>)(.+?)(</name>)" "<name-credit$2$3$4$1$5"
-regexpreplace "<name-credit joinphrase=\"(.+?)\">(<name>)(.+?)(</name>)(<artist id=\".+?\">)(<name>)(.+?)(</name>)" "<name-credit$2$3$1$4$5<name2>$7</name2>"
-regexpreplace "<name-credit>(<name>)(.+?)(</name>)(<artist id=\".+?\">)(<name>)(.+?)(</name>)" "<name-credit>$1$2$3$4<name2>$6</name2>"
-
-findinline "<medium-list count=\""
+outputto "BARCODE"
+json_select "barcode"
+sayrest
 
 # Totaldiscs
 outputto "TEMP_TotalDiscs"
-saynextnumber
+json_select_many_count "media"
+sayrest
 
-findinline ">"
+json_foreach "media"
 
-do
-	if "<track"
-		movechar 7
-	endif
+	# Collect the medium title
+	set "TEMP_DiscTitle"
+	json_select "title"
+	outputto "TEMP_DiscTitle"
+	sayrest
 
-	if "<medium>"
-		## Collect the medium title (if exists)
-		set "TEMP_DiscTitle"
-		outputto "TEMP_DiscTitle"
-		sayregexp "(?<=<title>)[^<]+(?=</title>)" "" "<position>"
+	# Collect the medium number
+	set "TEMP_DiscNumber"
+	json_select "position"
+	outputto "TEMP_DiscNumber"
+	sayrest
 
-		outputto "Disc Title"
-		sayregexp "(?<=<title>)[^<]+(?=</title>)" "" "<position>"
-		say "|"
+	# Collect total tracks
+	set "TEMP_TotalTracks"
+	json_select "track-count"
+	outputto "TEMP_TotalTracks"
+	sayrest
 
-		findinline "<position>"
+	json_foreach "tracks"
 
-		## Collect the medium number (if exists)
-		set "TEMP_DiscNumber"
-		outputto "TEMP_DiscNumber"
-		sayregexp "\d+" "" "</"
-
-		outputto "Discnumber"
-		sayregexp "\d+" "" "</"
-		say "/"
-		sayoutput "TEMP_TotalDiscs"
-		say "|"
-
-		set "TEMP_TotalTracks"
-		outputto "TEMP_TotalTracks"
-		findinline "track-list "
-		sayregexp "(?<=count=\")\d+(?=\")" ", " "<track"
-
-		findinline "<track"
-	else
-		outputto "Disc Title"
+		outputto "SETSUBTITLE"
 		sayoutput "TEMP_DiscTitle"
 		say "|"
 
-		outputto "Discnumber"
+		outputto "DISCNUMBER"
 		sayoutput "TEMP_DiscNumber"
 		say "/"
 		sayoutput "TEMP_TotalDiscs"
-		say "|" 
-	endif
+		say "|"
 
-	# Track Temp
-	outputto "TEMP_Track"
-	sayregexp "(?<=<position>)\d+(?=</position)" ", " "</track>"
-	say "/"
-	sayoutput "TEMP_TotalTracks"
-	say "|"
+		# Track Temp
+		outputto "TEMP_Track"
+		json_select "position"
+		sayrest
+		say "/"
+		sayoutput "TEMP_TotalTracks"
+		say "|"
 
-	# _LENGTH
-	outputto "_LENGTH"
-	sayregexp "(?<=<length>)[^<]+(?=</length>)" ", " "</track>"
-	say "|"
+		json_select_object "recording"
 
-	# ISRC
-	outputto "ISRC"
-	sayregexp "(?<=<isrc id=\")[^\"]+(?=\")" ", " "</track>"
-	say "|"
+		# MusicBrainz Track ID
+		outputto "MUSICBRAINZ_TRACKID"
+		json_select "id"
+		sayrest
+		say "|"
 
-	# MusicBrainz Track ID
-	outputto "MUSICBRAINZ_TRACKID"
-	sayregexp "(?<=<recording id=\")[-0-9a-y]{36,40}(?=\")" ", " "</track>"
-	say "|"
+		# _LENGTH
+		outputto "_LENGTH"
+		json_select "length"
+		sayrest
+		say "|"
 
-	# Tracks
-	outputto "TEMP_Title"
-	findinline "<title>"
-	sayuntil "</title>"
-	say "|"
+		# ISRC
+		outputto "ISRC"
+		json_select_array "isrcs" -1 ", "
+		sayrest
+		say "|"
 
-	# Tracks
-	outputto "tracks"
-	say "|"
+		# Tracks
+		outputto "TEMP_Title"
+		json_select "title"
+		sayrest
+		say "|"
 
-	findinline "</title>"
-	if "<length>"
-		findinline "</length>"
-	endif
-	
-	if "<artist-credit>"
-		# MusicBrainz Artist ID
+		# Tracks
+		outputto "TRACKS"
+		say "|"
+
+		json_foreach "artist-credit"
+			outputto "ARTIST"
+			json_select "name"
+			sayoutput "TEMP_Join"
+			sayrest
+
+			json_select_object "artist"
+			
+			outputto "ARTISTSORT"
+			json_select "sort-name"
+			ifoutput "TEMP_Join"
+				say "; "
+			endif
+			sayrest
+
+			outputto "MUSICBRAINZ_ARTISTID"
+			json_select "id"
+			ifoutput "TEMP_Join"
+				say ", "
+			endif
+			sayrest
+
+			json_unselect_object
+
+			set "TEMP_Join"
+			outputto "TEMP_Join"
+			json_select "joinphrase"
+			sayrest
+		json_foreach_end
+		set "TEMP_Join"
+
+		outputto "ARTIST"
+		say "|"
+
+		outputto "ARTISTSORT"
+		say "|"
+
 		outputto "MUSICBRAINZ_ARTISTID"
-		sayregexp "(?<=<artist id=\")[-0-9a-y]{36,40}(?=\")" ", " "</artist-credit>"
 		say "|"
-			
-		# Artist
-		outputto "Artist"
-		sayregexp "(?<=<name>)[^<]+(?=</name>)" "" "</artist-credit>"
-		say "|"
-			
-		# Artistsort
-		outputto "Artistsort"
-		sayregexp "(?<=<sort-name>)[^<]+(?=</sort-name>)" "; " "</artist-credit>"
-		say "|"
-	else	
-		# MusicBrainz Artist ID
-		outputto "MUSICBRAINZ_ARTISTID"
-		sayregexp "(?<=<artist id=\")[-0-9a-y]{36,40}(?=\")" ", " "</track>"
-		say "|"
-			
-		# Artist
-		outputto "Artist"
-		sayregexp "(?<=<name>)[^<]+(?=</name>)" "" "</track>"
-		say "|"
-			
-		# Artistsort
-		outputto "Artistsort"
-		sayregexp "(?<=<sort-name>)[^<]+(?=</sort-name>)" "; " "</track>"
-		say "|"
-	endif
-	
-	findinline "</track>"
-	
-while "<track" 999
+
+		json_unselect_object
+
+	json_foreach_end
+
+json_foreach_end
 
 # Avoid discnumber 1/1 
-gotoline 1
-
-replace "</track-list></medium></medium-list>" ""
-replace "</track-list></medium>" "<track>"
-
-findinline "<medium-list count=\""
-if "1\""
-	set "Discnumber"
+json_select_many_count "media"
+if "1"
+	set "DISCNUMBER"
 endif
 
-outputto "Title"
+outputto "TITLE"
 sayoutput "TEMP_Title"
 
-outputto "Track"
+outputto "TRACK"
 sayoutput "TEMP_Track"
 
 set "TEMP_DiscNumber"
 set "TEMP_DiscTitle"
+set "TEMP_Join"
 set "TEMP_Title"
 set "TEMP_TotalDiscs"
 set "TEMP_TotalTracks"

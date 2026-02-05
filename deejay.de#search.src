@@ -1,0 +1,88 @@
+# https://deejay.de/
+
+[MinAppVersionWin]=3.22
+[MinAppVersionMac]=1.8.6
+[Name]=deejay.de
+[BasedOn]=https://deejay.de/
+[IndexUrl]=https://deejay.de/content.php?param=/%s/perpage_160/page_1
+[AlbumUrl]=https://deejay.de/content.php?param=/%s
+[WordSeparator]=%20
+[SearchBy]=$regexp(%album%,'\s+\[.+\]$',,1) $regexp(%artist%,'\s+\[.+\]$',,1) $regexp(%albumartist%,'\s+\[.+\]$',,1)
+[Encoding]=url-utf-8
+[IndexFormat]=%article_id%|%cover%|%title%|%_url%|%Album%|%Artist%|%Date%|%_coverurl%
+
+# ###################################################################
+#					I  N  D  E  X
+# ###################################################################
+[ParserScriptIndex]=...
+DebugWriteInput "c:\debug-input.out"
+debug "on" "c:\deejay.de.ParserScriptIndex.html" 20
+
+findline "<!DOCTYPE html>"
+findinline "<!DOCTYPE html>"
+JoinUntil "</html>"
+replace "|" "$verticalBar()"
+
+findline "<div id=\"theList\" class=" 1 1
+joinuntil "<input type=\"checkbox\" value=\"dj_dark\" class=\"theme-controller hidden\">"
+unspace
+
+regexpreplace "<article id=\"([^\"]*)\" class=¥"clearfix product notangemeldet¥">" "<<endTrack>><<nextTrack>><TrackTrackID=$1>"
+regexpreplace "<div class=¥"cover¥"><div class=¥"img img1¥"><a href=\"([^\"]*)\"><img src=\"([^\"]*)\" alt=\"([^\"]*)\" loading=¥"lazy¥"></a></div></div>" "<Url=$1><CoverUrl=$2>"
+regexpreplace "<h3 class=¥"title¥"><a href=\"([^\"]*)\">([^<]*)</h3>" "<Title=$2>"
+regexpreplace "<span class="medium disc1">([^<]*)</span>" "<Medium=$>"
+regexpreplace "<span class="musiclabel flex flex-wrap gap-4 items-center"><strong>([^<]*)</string><br><a href=\"([^\"]*)\">([^<]*)</a></span>" "<CatalogNumber=$1><Label=$3>"
+regexpreplace "<span class="date">([^<]*)</span>" "<Date=$>"
+
+
+
+# <div id="theList">
+# <article 
+#   <div class="main_container">
+#       <div class="cover">
+#           <div class="img img1">
+#               <a href="/DAVID_BYRNE_%26_FATBOY_SLIM_HERE_LIES_LOVE_LP_2x12_0075597905557__1028078"><img
+#                    src="https://www.deejay.de/images/l/7/8/1028078.jpg"
+#       <div class="inner_container">
+#           <div class="inner_a">
+#               <div class="artikel">
+#                   <h2 class="artist flex flex-wrap gap-2"><span><a>
+#                   <h3 class="title"><a>
+#                   <div class="infos flex flex-wrap gap-4 items-center">
+#                       <span class="medium disc1">
+#                       <span class="musiclabel flex flex-wrap gap-4 items-center">
+#                       <span class="date">
+#               <div class="inner_container_text">
+#                   <div>
+#                       <div class="tracks">
+#                           <ul class="playtrack">
+#                               <li><a class="track" title="Play" id="playTrack_1028078_a"
+#                                    href="play/__1028078_a"
+#                                    rel="noindex,nofollow"><b>A1</b>: Here Lies Love Feat.
+#                                    Florence Welch (Florence & The Machine)</a></li>
+#                       <div class="flex-grow">
+#                           <div class="description">
+#                           <div class="flex flex-wrap gap-2"><a
+                                                        class="badge badge-sm md:badge-md badge-primary"
+                                                        href="/m_House/sm_News">House</a><a
+                                                        class="badge badge-sm md:badge-md badge-neutral"
+                                                        href="/m_House/sm_News/substyles_110">Disco</a><a
+                                                        class="badge badge-sm md:badge-md badge-neutral"
+                                                        href="/m_House/sm_News/substyles_130">Slow</a><a
+                                                        class="badge badge-sm md:badge-md badge-primary"
+                                                        href="/m_Hip-Hop/sm_News">Hip-Hop</a><a
+                                                        class="badge badge-sm md:badge-md badge-neutral"
+                                                        href="/m_Hip-Hop/sm_News/substyles_406">R & B</a><a
+                                                        class="badge badge-sm md:badge-md badge-neutral"
+                                                        href="/m_Hip-Hop/sm_News/substyles_410">Funk</a></div>
+                                            </div>
+
+# ###################################################################
+#					A  L  B  U  M
+# ###################################################################
+[ParserScriptAlbum]=...
+DebugWriteInput "c:\debug-input.out"
+debug "on" "c:\deejay.de.ParserScriptAlbum.html" 20
+
+findline "<!DOCTYPE html>"
+JoinUntil "</html>"
