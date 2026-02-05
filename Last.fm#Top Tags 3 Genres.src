@@ -1,0 +1,43 @@
+# Mp3tag (2.38 or higher) Parsing for Last.fm by dano
+# Save it in your Mp3tag data directory, 
+# e.g. C:\Documents and Settings\*username*\Application Data\Mp3tag\data\sources
+#
+#	DO NOT COPY/MODIFY AND REDISTRIBUTE THIS WITHOUT PERMISSION
+#
+#   Get the first 3 Top Tags as Genre to categorize your music
+#
+[Name]=Last.fm TopTags
+[BasedOn]=www.last.fm
+[AlbumUrl]=http://ws.audioscrobbler.com/1.0/artist/%s/toptags.xml
+[WordSeperator]=+
+[SearchBy]=$replace(%artist%,/,'%'252F,&,'%'2526)
+[Encoding]=url-utf-8
+
+[ParserScriptAlbum]=...
+# ###################################################################
+#					A  L  B  U  M
+# ###################################################################
+#debug "on" "C:\debug_Last.fm-Artist-TopTags_B.html" "20"
+
+joinuntil "</toptags>"
+
+regexpreplace "(?<=<name>)(\l)" "\u$1"
+regexpreplace "\s(\l)" " \u$1"
+regexpreplace "-(\l)" "-\u$1"
+
+outputto "Genre"
+
+findinline "<name>"
+sayuntil "</name>"
+findinline "</tag>" 1 1
+if "<tag"
+    do  
+        say ", "
+        findinline "<name>"
+        sayuntil "</name>"
+        
+        findinline "</tag>" 1 1
+    while "<tag" 1 # Change second parameter to determine the amount of style tags 1=3 Genres, 2=4 Genres,...
+endif
+
+
