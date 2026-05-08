@@ -1,0 +1,134 @@
+# Bandcamp Tag Source for Mp3tag
+#
+# Initial release by ms6676749.
+# See CHANGELOG.md for a list of changes.
+
+[Name]=Bandcamp
+[BasedOn]=bandcamp.com
+[AlbumUrl]=%s
+[WordSeparator]=%20
+[SearchBy]=Bandcamp URL||||%s
+[Encoding]=utf-8
+[Settings]=&Bandcamp#Settings.settings
+[MinAppVersionWin]=3.22
+[MinAppVersionMac]=1.8.6
+[Version]=0.4.4
+
+[ParserScriptAlbum]=...
+# ###################################################################
+#					A  L  B  U  M
+# ###################################################################
+
+JoinUntil "</html>"
+RegexpReplace "<!DOCTYPE\s+.+?json\">" "" # Extract embedded JSON
+RegexpReplace "</script>.+?</html>.*" ""
+Replace "|" "$verticalBar()"
+
+json "ON" "current"
+
+OutputTo "ARTIST"
+json_select_object "byArtist"
+json_select "name"
+SayRest
+json_unselect_object
+
+OutputTo "ALBUM"
+json_select "name"
+SayRest
+
+OutputTo "_TEMP_YEAR"
+json_select "datePublished"
+Replace " Jan " ".01."
+Replace " Feb " ".02."
+Replace " Mar " ".03."
+Replace " Apr " ".04."
+Replace " May " ".05."
+Replace " Jun " ".06."
+Replace " Jul " ".07."
+Replace " Aug " ".08."
+Replace " Sep " ".09."
+Replace " Oct " ".10."
+Replace " Nov " ".11."
+Replace " Dec " ".12."
+RegexpReplace "(\d+).(\d+).(\d+)\s(.+?)\sGMT" "$3-$2-$1"
+SayRest
+
+OutputTo "YEAR"
+json_select "datePublished"
+IfVar "yearFormat" "YYYY"
+	RegexpReplace "(\d+)\s([a-zA-z]{3})\s(\d+).+?\sGMT" "$3"
+	SayRest
+EndIf
+IfVar "yearFormat" "YYYY-MM-DD"
+	SayOutput "_TEMP_YEAR"
+EndIf
+
+OutputTo "RELEASETIME"
+json_select "datePublished"
+RegexpReplace "(\d+).(.+).(\d+)\s(.+?)\sGMT" "T$4"
+SayOutput "_TEMP_YEAR"
+SayRest
+
+OutputTo "GENRE"
+json_select_object "publisher"
+json_select "genre"
+RegexpReplace "https://bandcamp.com/discover/(.+?)" "$1"
+RegexpReplace "https://bandcamp.com/tag/(.+?)" "$1"
+SayFormat "$caps(%_current%)"
+json_unselect_object
+
+OutputTo "KEYWORDS"
+json_select_array "keywords" -1 ", "
+SayRest
+
+OutputTo "COMMENT"
+json_select "description"
+SayRest
+
+OutputTo "CREDITS"
+json_select "creditText"
+SayRest
+
+OutputTo "WWW"
+json_select "mainEntityOfPage"
+SayRest
+
+OutputTo "COVERURL"
+json_select "image"
+IfVar "maxCoverQuality" "true"
+	RegexpReplace "_\d+" "_0"
+EndIf
+SayRest
+
+OutputTo "TOTALTRACKS"
+json_select "numTracks"
+SayRest
+
+json_select_object "track"
+
+json_foreach "itemListElement"
+	json_select "position"
+
+	OutputTo "TRACK"
+	SayRest
+	Say "|"
+
+	json_select_object "item"
+
+	OutputTo "TRACKS"
+	json_select "name"
+	SayRest
+	Say "|"
+
+	OutputTo "_LENGTH"
+	json_select "duration"
+	RegexpReplace "P00H(\d+)M(\d+)S" "$1:$2"
+	RegexpReplace "P(\d+)H(\d+)M(\d+)S" "$1:$2:$3"
+	SayRest
+	Say "|"
+
+json_foreach_end
+
+json_unselect_object
+
+Set "_TEMP_YEAR"

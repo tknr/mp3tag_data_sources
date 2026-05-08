@@ -1,0 +1,4710 @@
+[Name]=VGMdb
+[BasedOn]=vgmdb.net
+[SearchBy]=Enter VGMdb album url||%VGMDB_URL%||%s
+[UserAgent]=1
+
+# Headings generated with "p_skateb"
+# via kammerl.de/ascii/AsciiSignature.php
+
+ #####  ##   ##  #####  ######   #####  ####### ##      #####   #####
+##   ## ##   ## ##   ## ##   ## ##   ## ##      ##     ##   ## ##   ##
+##      ##   ## ##   ## ##   ## ##      ##      ##     ##   ## ##
+##      ####### ####### ##   ## ## ###  #####   ##     ##   ## ## ###
+##      ##   ## ##   ## ##   ## ##   ## ##      ##     ##   ## ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##      ##     ##   ## ##   ##
+ #####  ##   ## ##   ## ##   ##  #####  ####### ####### #####   #####
+
+######################################################################
+######################################################################
+
+# 2.6.2-20250323
+# - Fixed an issue with the credit section sometimes containing excess
+#   spaces and HTML tags
+# --------------------------------------------------------------------
+# 2.6.1-20250316
+# - TOTALTRACKS is now also written to the default TOTALTRACKS field
+#   in addition to VGMDB_TOTALTRACKS
+# --------------------------------------------------------------------
+# 2.6.0-20250315
+# - TOTALTRACKS is enabled again and should display the correct number
+#   of tracks across all discs
+# --------------------------------------------------------------------
+# 2.5.1-20250225
+# - Fixed an error if credits are missing entirely on VGMdb
+# --------------------------------------------------------------------
+# 2.5.0-20250215
+# - Code cleanup
+# --------------------------------------------------------------------
+# 2.4.8-20250105
+# - Fixed an error where the disc numbers would not be properly
+#   assigned on MacOS
+# --------------------------------------------------------------------
+# 2.4.7-20250104
+# - Fine tuning for the last fix
+# - Track numbers are now numbered by disc not total
+# - Disabled the default mapping to TOTALTRACKS since it is not
+#   accurate on multi disc albums
+# --------------------------------------------------------------------
+# 2.4.6-20250103
+# - Fixed an error leading to the last track of an album being not
+#   displayed on MacOS
+# --------------------------------------------------------------------
+# 2.4.5-20240901
+# - Fixed an error when Notes/Description is empty
+# --------------------------------------------------------------------
+# 2.4.4-20240901
+# - Remove HTML tags from Notes/Description (VGMDB_NOTES)
+# - Added "Release Event" (VGMDB_RELEASE_EVENT)
+# --------------------------------------------------------------------
+# 2.4.3-20240816
+# - Fixed a few more edgecases with credits
+# --------------------------------------------------------------------
+# 2.4.2-20240815
+# - Fixed credit indicator in ALL_CREDITS sometimes being translated
+#   and sometimes being not; this seems to be random behavior by
+#   VGMdb...
+# --------------------------------------------------------------------
+# 2.4.1-20240815
+# - Fixed credits containing the "Uncredited" information
+# --------------------------------------------------------------------
+# 2.4.0-20240815
+# - Added original and translated versions of all credits; translated
+#   versions are used by default
+# --------------------------------------------------------------------
+# 2.3.0-20240611
+# - Added VGMDB_TOTALTRACKS and VGMDB_TOTALDISCS
+# - Added more fields to the default mapping
+# --------------------------------------------------------------------
+# 2.2.0-20240602
+# - Fixed an error when there are no associated products for an album
+# - Fixed an error parsing multi-disc albums
+# - Added support for the "Music Credit" (VGMDB_MAIN_CREDITS_MUSIC)
+# --------------------------------------------------------------------
+# 2.1.0-20240125
+# - Added support for up to 8 tracklists and up to 8 discs in each
+#   tracklist
+# --------------------------------------------------------------------
+# 2.0.0-20230309
+# - Maintenance and code cleanup
+# --------------------------------------------------------------------
+# 1.1.3-20230212
+# - Fixed handling of multiple "VGMDB_PRODUCTS_REPRESENTED_*"
+# --------------------------------------------------------------------
+# 1.1.2-20230205
+# - Fixed regressions with "VGMDB_PRODUCTS_REPRESENTED_*" and
+#   "VGMDB_BARCODE"
+# - Fixed handling of child menus in "VGMDB_CATALOG_NUMBER"
+# --------------------------------------------------------------------
+# 1.1.2-20230205
+# - Fixed regressions with "VGMDB_PRODUCTS_REPRESENTED_*" and
+#   "VGMDB_BARCODE"
+# - Fixed handling of child menus in "VGMDB_CATALOG_NUMBER"
+# --------------------------------------------------------------------
+# 1.1.1-20230204
+# - Fixed annotations in "VGMDB_MEDIA_FORMAT"
+#   (e. g. "Cactus Data Shield")
+# - Fixed error on missing Barcode
+# - Fixed "VGMDB_PRODUCTS_REPRESENTED_*" not being picked up when
+#   product is the same for all languages and has no special entry
+# --------------------------------------------------------------------
+# 1.1.0-20230202
+# - Replaced "VGMDB_PRODUCTS_REPRESENTED" with
+#   "VGMDB_PRODUCTS_REPRESENTED_EN", "VGMDB_PRODUCTS_REPRESENTED_JA"
+#   and "VGMDB_PRODUCTS_REPRESENTED_JA_LATN"
+# --------------------------------------------------------------------
+# 1.0.4-20230201
+# - Fixed pipe characters ("|") in album titles
+# --------------------------------------------------------------------
+# 1.0.3-20230201
+# - Fixed indented credits in "VGMDB_ALL_CREDITS"
+# --------------------------------------------------------------------
+# 1.0.2-20230130
+# - Changed default mapping for "GENRE" to favour
+#   "VGMDB_DISC_CLASSIFICATION" over "VGMDB_CLASSIFICATION"
+# --------------------------------------------------------------------
+# 1.0.1-20230127
+# - Fixed wrong delimiter in "VGMDB_ALL_CREDITS"
+# --------------------------------------------------------------------
+# 1.0.0-20230127
+# - Initial Release
+
+[ParserScriptAlbum]=...
+
+# Debug "ON" "debug.txt"
+
+ #####  ##      ######  ##   ##  #####
+##   ## ##      ##   ## ##   ## ## # ##
+##   ## ##      ##   ## ##   ## ## # ##
+####### ##      ######  ##   ## ## # ##
+##   ## ##      ##   ## ##   ## ##   ##
+##   ## ##      ##   ## ##   ## ##   ##
+##   ## ####### ######   #####  ##   ##
+
+#######################################
+#######################################
+
+###### #### ###### ##      #######
+  ##    ##    ##   ##      ##
+  ##    ##    ##   ##      ##
+  ##    ##    ##   ##      #####
+  ##    ##    ##   ##      ##
+  ##    ##    ##   ##      ##
+  ##   ####   ##   ####### #######
+
+##################################
+
+# The japanese, romaji and english titles are scraped
+
+# Japanese title
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_ALBUM_TITLE_JA"
+FindLine "class=\"albumtitle\"" 1 1
+Unspace
+Replace "<em> / </em>" ""
+Replace "|" "/"
+FindInLine "lang=\"ja\"" 1 1
+FindInLine ">" 1 1
+SayUntil "</span"
+
+# Romaji title
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_ALBUM_TITLE_JA_LATN"
+FindLine "class=\"albumtitle\"" 1 1
+Unspace
+Replace "<em> / </em>" ""
+Replace "|" "/"
+FindInLine "lang=\"ja-Latn\"" 1 1
+FindInLine ">" 1 1
+SayUntil "</span"
+
+# English title
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_ALBUM_TITLE_EN"
+FindLine "class=\"albumtitle\"" 1 1
+Unspace
+Replace "<em> / </em>" ""
+Replace "|" "/"
+FindInLine "lang=\"en\"" 1 1
+FindInLine ">" 1 1
+SayUntil "</span"
+
+ #####   #####  ##   ## ####### ######
+##   ## ##   ## ##   ## ##      ##   ##
+##      ##   ## ##   ## ##      ##   ##
+##      ##   ## ##   ## #####   ######
+##      ##   ##  ## ##  ##      ##   ##
+##   ## ##   ##  ## ##  ##      ##   ##
+ #####   #####    ###   ####### ##   ##
+
+#######################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "COVERURL"
+FindLine "id=\"coverart\"" 1 1
+Replace "medium-" ""
+FindInLine "style=\"background-image: url(" 1 1
+If "'"
+	MoveChar 1
+	SayUntil "'"
+Else
+	FindInLine "../"
+	SayUntil "\""
+EndIf
+
+ #####   ##### ###### #####  ##      #####   #####  ######  ##   ##  #####  ######  ####### ######
+##   ## ##   ##  ##  ##   ## ##     ##   ## ##   ## ##   ## ##   ## ## # ## ##   ## ##      ##   ##
+##      ##   ##  ##  ##   ## ##     ##   ## ##      ##   ## ##   ## ## # ## ##   ## ##      ##   ##
+##      #######  ##  ####### ##     ##   ## ## ###  ##   ## ##   ## ## # ## ######  #####   ######
+##      ##   ##  ##  ##   ## ##     ##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##   ## ##   ##  ##  ##   ## ##     ##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+ #####  ##   ##  ##  ##   ## ####### #####   #####  ##   ##  #####  ##   ## ######  ####### ##   ##
+
+###################################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_CATALOG_NUMBER"
+FindLine "<b>Catalog Number</b>" 1 1
+MoveLine 1
+FindInLine "<td width=\"100%\">" 1 1
+If "<"
+  FindInLine "<a href=\"#\">" 1 1
+  SayUntil "</a>"
+Else
+  SayRest
+EndIf
+
+######   #####  ######   #####   #####  ######  #######
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##
+##   ## ##   ## ##   ## ##      ##   ## ##   ## ##
+######  ####### ######  ##      ##   ## ##   ## #####
+##   ## ##   ## ##   ## ##      ##   ## ##   ## ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##
+######  ##   ## ##   ##  #####   #####  ######  #######
+
+#######################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_BARCODE"
+FindLine "<b>Barcode</b>" 1 1
+If "<tr>"
+  MoveLine 1
+  RegExpReplace "<.*?>" ""
+  SayRest
+EndIf
+
+######  ####### ##      #######  #####   #####  ####### ######   ##### ###### #######
+##   ## ##      ##      ##      ##   ## ##   ## ##      ##   ## ##   ##  ##   ##
+##   ## ##      ##      ##      ##   ## ##      ##      ##   ## ##   ##  ##   ##
+######  #####   ##      #####   #######  #####  #####   ##   ## #######  ##   #####
+##   ## ##      ##      ##      ##   ##      ## ##      ##   ## ##   ##  ##   ##
+##   ## ##      ##      ##      ##   ## ##   ## ##      ##   ## ##   ##  ##   ##
+##   ## ####### ####### ####### ##   ##  #####  ####### ######  ##   ##  ##   #######
+
+#####################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_RELEASE_DATE"
+FindLine "<b>Release Date</b>" 1 1
+MoveLine 1
+FindInLine "href=\"/db/calendar.php" 1 1
+FindInLine "#" 1 1
+SayUntil "\">"
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_RELEASE_DATE_YEAR"
+FindLine "<b>Release Date</b>" 1 1
+MoveLine 1
+FindInLine "href=\"/db/calendar.php" 1 1
+FindInLine "#" 1 1
+SayNChars 4
+
+######  ####### ##      #######  #####   #####  #######   ####### ##   ## ####### ###### ######
+##   ## ##      ##      ##      ##   ## ##   ## ##        ##      ##   ## ##      ##   ##  ##
+##   ## ##      ##      ##      ##   ## ##      ##        ##      ##   ## ##      ##   ##  ##
+######  #####   ##      #####   #######  #####  #####     #####   ##   ## #####   ##   ##  ##
+##   ## ##      ##      ##      ##   ##      ## ##        ##       ## ##  ##      ##   ##  ##
+##   ## ##      ##      ##      ##   ## ##   ## ##        ##       ## ##  ##      ##   ##  ##
+##   ## ####### ####### ####### ##   ##  #####  #######   #######   ###   ####### ##   ##  ##
+
+###############################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_RELEASE_EVENT"
+FindLine "<b>Release Date</b>" 1 1
+MoveLine 1
+FindInLine "link_event" 1 1
+FindInLine "title='" 1 1
+SayUntil "' href"
+
+ #####  ####### ###### ####  #####  ####### #####  ######   #####   ##### ######
+## # ## ##      ##   ## ##  ##   ## ##     ##   ## ##   ## ## # ## ##   ##  ##
+## # ## ##      ##   ## ##  ##   ## ##     ##   ## ##   ## ## # ## ##   ##  ##
+## # ## #####   ##   ## ##  ####### #####  ##   ## ######  ## # ## #######  ##
+##   ## ##      ##   ## ##  ##   ## ##     ##   ## ##   ## ##   ## ##   ##  ##
+##   ## ##      ##   ## ##  ##   ## ##     ##   ## ##   ## ##   ## ##   ##  ##
+##   ## ####### ###### #### ##   ## ##      #####  ##   ## ##   ## ##   ##  ##
+
+################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MEDIA_FORMAT"
+FindLine "<b>Media Format</b>" 1 1
+MoveLine 1
+RegExpReplace "<.*?>" ""
+Unspace
+SayRest
+
+ #####  ##       #####   #####   ##### #### ####### #### #####   ##### ###### #### #####  ######
+##   ## ##      ##   ## ##   ## ##   ## ##  ##       ## ##   ## ##   ##  ##    ## ##   ## ##   ##
+##      ##      ##   ## ##      ##      ##  ##       ## ##      ##   ##  ##    ## ##   ## ##   ##
+##      ##      #######  #####   #####  ##  #####    ## ##      #######  ##    ## ##   ## ##   ##
+##      ##      ##   ##      ##      ## ##  ##       ## ##      ##   ##  ##    ## ##   ## ##   ##
+##   ## ##      ##   ## ##   ## ##   ## ##  ##       ## ##   ## ##   ##  ##    ## ##   ## ##   ##
+ #####  ####### ##   ##  #####   ##### #### ##      #### #####  ##   ##  ##   #### #####  ##   ##
+
+#################################################################################################
+
+GotoLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_CLASSIFICATION"
+FindLine "<b>Classification</b>" 1 1
+MoveLine 1
+FindInLine "<td>"
+SayUntil " </td></tr>"
+
+##       #####  ######  ####### ##
+##      ##   ## ##   ## ##      ##
+##      ##   ## ##   ## ##      ##
+##      ####### ######  #####   ##
+##      ##   ## ##   ## ##      ##
+##      ##   ## ##   ## ##      ##
+####### ##   ## ######  ####### #######
+
+#######################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_LABEL"
+FindLine "<b>Label</b>" 1 1
+RegExpReplace ".*?(?=<b>Label</b>)" ""
+RegExpReplace "</tr>.*" ""
+SayRegExp "(?<=display\:inline\">).*?(?=<\/span>)" " / "
+
+ #####   #####  ######  ##   ## ####### #####   ##### ###### ##   ## ######  ####### ######
+## # ## ##   ## ##   ## ##   ## ##     ##   ## ##   ##  ##   ##   ## ##   ## ##      ##   ##
+## # ## ##   ## ##   ## ##   ## ##     ##   ## ##       ##   ##   ## ##   ## ##      ##   ##
+## # ## ####### ##   ## ##   ## #####  ####### ##       ##   ##   ## ######  #####   ######
+##   ## ##   ## ##   ## ##   ## ##     ##   ## ##       ##   ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ## ##   ## ##     ##   ## ##   ##  ##   ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ##  #####  ##     ##   ##  #####   ##    #####  ##   ## ####### ##   ##
+
+############################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MANUFACTURER"
+FindLine "<b>Manufacturer</b>" 1 1
+RegExpReplace ".*?(?=<b>Manufacturer</b>)" ""
+RegExpReplace "</tr>.*" ""
+SayRegExp "(?<=display\:inline\">).*?(?=<\/span>)" " / "
+
+###### #### ##### ###### ######  #### ######  ##   ## ###### #####  ######
+##   ## ## ##   ##  ##   ##   ##  ##  ##   ## ##   ##   ##  ##   ## ##   ##
+##   ## ## ##       ##   ##   ##  ##  ##   ## ##   ##   ##  ##   ## ##   ##
+##   ## ##  #####   ##   ######   ##  ######  ##   ##   ##  ##   ## ######
+##   ## ##      ##  ##   ##   ##  ##  ##   ## ##   ##   ##  ##   ## ##   ##
+##   ## ## ##   ##  ##   ##   ##  ##  ##   ## ##   ##   ##  ##   ## ##   ##
+###### #### #####   ##   ##   ## #### ######   #####    ##   #####  ##   ##
+
+###########################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_DISTRIBUTOR"
+FindLine "<b>Distributor</b>" 1 1
+RegExpReplace ".*?(?=<b>Distributor</b>)" ""
+RegExpReplace "</tr>.*" ""
+SayRegExp "(?<=display\:inline\">).*?(?=<\/span>)" " / "
+
+######  ##   ## ######  ##      #### #####  ##   ## ####### ######
+##   ## ##   ## ##   ## ##       ## ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ## ##       ## ##      ##   ## ##      ##   ##
+######  ##   ## ######  ##       ##  #####  ####### #####   ######
+##      ##   ## ##   ## ##       ##      ## ##   ## ##      ##   ##
+##      ##   ## ##   ## ##       ## ##   ## ##   ## ##      ##   ##
+##       #####  ######  ####### #### #####  ##   ## ####### ##   ##
+
+###################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_PUBLISHER"
+FindLine "<b>Publisher</b>" 1 1
+RegExpReplace ".*?(?=<b>Publisher</b>)" ""
+RegExpReplace "</tr>.*" ""
+SayRegExp "(?<=display\:inline\">).*?(?=<\/span>)" " / "
+
+ #####   #####  ######  ##  ## ######  #### #####  ##   ## ######
+##   ## ##   ## ##   ## ##  ## ##   ##  ## ##   ## ##   ##   ##
+##      ##   ## ##   ## ##  ## ##   ##  ## ##      ##   ##   ##
+##      ##   ## ######   ####  ######   ## ## ###  #######   ##
+##      ##   ## ##        ##   ##   ##  ## ##   ## ##   ##   ##
+##   ## ##   ## ##        ##   ##   ##  ## ##   ## ##   ##   ##
+ #####   #####  ##        ##   ##   ## #### #####  ##   ##   ##
+
+#################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_PHONOGRAPHIC_COPYRIGHT"
+FindLine "<b>Phonographic Copyright</b>" 1 1
+RegExpReplace ".*?(?=<b>Phonographic Copyright</b>)" ""
+RegExpReplace "</tr>.*" ""
+SayRegExp "(?<=display\:inline\">).*?(?=<\/span>)" " / "
+
+ #####   ##### ###### ####### #####   #####  ######  ##  ##
+##   ## ##   ##  ##   ##     ##   ## ##   ## ##   ## ##  ##
+##      ##   ##  ##   ##     ##      ##   ## ##   ## ##  ##
+##      #######  ##   #####  ## ###  ##   ## ######   ####
+##      ##   ##  ##   ##     ##   ## ##   ## ##   ##   ##
+##   ## ##   ##  ##   ##     ##   ## ##   ## ##   ##   ##
+ #####  ##   ##  ##   ####### #####   #####  ##   ##   ##
+
+###########################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_CATEGORY"
+FindLine "<b class=\"label\">Category</b>" 1 1
+MoveLine 1
+SayUntil " </div>"
+
+######  ######   #####  ######  ##   ##  ##### ###### #####
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ##  ##  ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##       ##  ##
+######  ######  ##   ## ##   ## ##   ## ##       ##   #####
+##      ##   ## ##   ## ##   ## ##   ## ##       ##       ##
+##      ##   ## ##   ## ##   ## ##   ## ##   ##  ##  ##   ##
+##      ##   ##  #####  ######   #####   #####   ##   #####
+
+############################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_PRODUCTS_REPRESENTED_EN"
+FindLine "<b class=\"label\">Products represented</b>" 1 1
+FindInLine "<b class=\"label\">Products represented" 1 1
+If "</b>"
+  MoveLine 1
+  RegExpReplace "<\/div>" ""
+  RegExpReplace "<em> / </em>" ""
+  RegExpReplace "<span style=\"display:none\"><\/span>" ""
+  RegExpReplace "<a.*?>" ""
+  RegExpReplace "<\/a.*?>" ""
+  RegExpReplace "<span[^>]*?lang=\"ja\".*?<\/span>" ""
+  RegExpReplace "<span[^>]*?lang=\"ja-Latn\".*?<\/span>" ""
+  RegExpReplace "<span.*?>" ""
+  RegExpReplace "<\/span.*?>" ""
+  RegExpReplace "<br \/>" ", "
+  Unspace
+  SayRest
+EndIf
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_PRODUCTS_REPRESENTED_JA"
+FindLine "<b class=\"label\">Products represented</b>" 1 1
+FindInLine "<b class=\"label\">Products represented" 1 1
+If "</b>"
+  MoveLine 1
+  RegExpReplace "<\/div>" ""
+  RegExpReplace "<em> / </em>" ""
+  RegExpReplace "<span style=\"display:none\"><\/span>" ""
+  RegExpReplace "<a.*?>" ""
+  RegExpReplace "<\/a.*?>" ""
+  RegExpReplace "<span[^>]*?lang=\"en\".*?<\/span>" ""
+  RegExpReplace "<span[^>]*?lang=\"ja-Latn\".*?<\/span>" ""
+  RegExpReplace "<span.*?>" ""
+  RegExpReplace "<\/span.*?>" ""
+  RegExpReplace "<br \/>" ", "
+  Unspace
+  SayRest
+EndIf
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_PRODUCTS_REPRESENTED_JA_LATN"
+FindLine "<b class=\"label\">Products represented</b>" 1 1
+FindInLine "<b class=\"label\">Products represented" 1 1
+If "</b>"
+  MoveLine 1
+  RegExpReplace "<\/div>" ""
+  RegExpReplace "<em> / </em>" ""
+  RegExpReplace "<span style=\"display:none\"><\/span>" ""
+  RegExpReplace "<a.*?>" ""
+  RegExpReplace "<\/a.*?>" ""
+  RegExpReplace "<span[^>]*?lang=\"en\".*?<\/span>" ""
+  RegExpReplace "<span[^>]*?lang=\"ja\".*?<\/span>" ""
+  RegExpReplace "<span.*?>" ""
+  RegExpReplace "<\/span.*?>" ""
+  RegExpReplace "<br \/>" ", "
+  Unspace
+  SayRest
+EndIf
+
+######   ##### ###### ####### #####
+##   ## ##   ##  ##   ##     ##   ##
+##   ## ##   ##  ##   ##     ##
+##   ## ##   ##  ##   #####   #####
+##   ## ##   ##  ##   ##          ##
+##   ## ##   ##  ##   ##     ##   ##
+##   ##  #####   ##   ####### #####
+
+####################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_NOTES"
+FindLine "id=\"notes\">" 1 1
+RegExpReplace "<br \/>" "\\r\\n"
+RegExpReplace "<[^>]*>" ""
+SayRest
+
+##   ## ######  ##
+##   ## ##   ## ##
+##   ## ##   ## ##
+##   ## ######  ##
+##   ## ##   ## ##
+##   ## ##   ## ##
+ #####  ##   ## #######
+
+#######################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_URL"
+SayOutput "CurrentUrl"
+
+ #####  ######  ####### ###### #### ###### #####
+##   ## ##   ## ##      ##   ## ##    ##  ##   ##
+##      ##   ## ##      ##   ## ##    ##  ##
+##      ######  #####   ##   ## ##    ##   #####
+##      ##   ## ##      ##   ## ##    ##       ##
+##   ## ##   ## ##      ##   ## ##    ##  ##   ##
+ #####  ##   ## ####### ###### ####   ##   #####
+
+#################################################
+#################################################
+
+ #####  ##   ##  ##### #### #####
+## # ## ##   ## ##   ## ## ##   ##
+## # ## ##   ## ##      ## ##
+## # ## ##   ##  #####  ## ##
+##   ## ##   ##      ## ## ##
+##   ## ##   ## ##   ## ## ##   ##
+##   ##  #####   ##### #### #####
+
+##################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_MUSIC_ORIGINAL"
+FindLine "style=\"display:inline\">Music</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Music</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_MUSIC_TRANSLATED"
+FindLine "style=\"display:inline\">Music</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Music</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+ #####   #####   #####  ######   #####   #####  ####### ######
+##   ## ##   ## ## # ## ##   ## ##   ## ##   ## ##      ##   ##
+##      ##   ## ## # ## ##   ## ##   ## ##      ##      ##   ##
+##      ##   ## ## # ## ######  ##   ##  #####  #####   ######
+##      ##   ## ##   ## ##      ##   ##      ## ##      ##   ##
+##   ## ##   ## ##   ## ##      ##   ## ##   ## ##      ##   ##
+ #####   #####  ##   ## ##       #####   #####  ####### ##   ##
+
+###############################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_COMPOSER_ORIGINAL"
+FindLine "style=\"display:inline\">Composer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Composer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_COMPOSER_TRANSLATED"
+FindLine "style=\"display:inline\">Composer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Composer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+##   ## ######  #### ###### ####### ######
+##   ## ##   ##  ##    ##   ##      ##   ##
+##   ## ##   ##  ##    ##   ##      ##   ##
+## # ## ######   ##    ##   #####   ######
+## # ## ##   ##  ##    ##   ##      ##   ##
+## # ## ##   ##  ##    ##   ##      ##   ##
+ #####  ##   ## ####   ##   ####### ##   ##
+
+###########################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_WRITER_ORIGINAL"
+FindLine "style=\"display:inline\">Writer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Writer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_WRITER_TRANSLATED"
+FindLine "style=\"display:inline\">Writer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Writer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+ #####  ######  ######   #####  ######   #####  ####### ######
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##      ##      ##   ##
+####### ######  ######  ####### ##   ## ## ###  #####   ######
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ##  #####  ####### ##   ##
+
+###############################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_ARRANGER_ORIGINAL"
+FindLine "style=\"display:inline\">Arranger</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Arranger</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_ARRANGER_TRANSLATED"
+FindLine "style=\"display:inline\">Arranger</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Arranger</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+######  ####### ######  ####### #####  ######   #####  ####### ######
+##   ## ##      ##   ## ##     ##   ## ##   ## ## # ## ##      ##   ##
+##   ## ##      ##   ## ##     ##   ## ##   ## ## # ## ##      ##   ##
+######  #####   ######  #####  ##   ## ######  ## # ## #####   ######
+##      ##      ##   ## ##     ##   ## ##   ## ##   ## ##      ##   ##
+##      ##      ##   ## ##     ##   ## ##   ## ##   ## ##      ##   ##
+##      ####### ##   ## ##      #####  ##   ## ##   ## ####### ##   ##
+
+######################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_PERFORMER_ORIGINAL"
+FindLine "style=\"display:inline\">Performer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Performer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_PERFORMER_TRANSLATED"
+FindLine "style=\"display:inline\">Performer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Performer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+##   ##  #####   #####   #####  ##      #####
+##   ## ##   ## ##   ## ##   ## ##     ##   ##
+##   ## ##   ## ##      ##   ## ##     ##
+##   ## ##   ## ##      ####### ##      #####
+ ## ##  ##   ## ##      ##   ## ##          ##
+ ## ##  ##   ## ##   ## ##   ## ##     ##   ##
+  ###    #####   #####  ##   ## ####### #####
+
+##############################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_VOCALS_ORIGINAL"
+FindLine "style=\"display:inline\">Vocals</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Vocals</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_VOCALS_TRANSLATED"
+FindLine "style=\"display:inline\">Vocals</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Vocals</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+##    ##  ## ######  #### ##### #### ##### ######
+##    ##  ## ##   ##  ## ##   ## ## ##   ##  ##
+##    ##  ## ##   ##  ## ##      ## ##       ##
+##     ####  ######   ## ##      ##  #####   ##
+##      ##   ##   ##  ## ##      ##      ##  ##
+##      ##   ##   ##  ## ##   ## ## ##   ##  ##
+####### ##   ##   ## #### ##### #### #####   ##
+
+#################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_LYRICIST_ORIGINAL"
+FindLine "style=\"display:inline\">Lyricist</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Lyricist</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_LYRICIST_TRANSLATED"
+FindLine "style=\"display:inline\">Lyricist</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Lyricist</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+######  ######   #####   #####  ######   #####   #####   #####  ####### ######
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ## # ## ## # ## ##      ##   ##
+##   ## ##   ## ##   ## ##      ##   ## ##   ## ## # ## ## # ## ##      ##   ##
+######  ######  ##   ## ## ###  ######  ####### ## # ## ## # ## #####   ######
+##      ##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##      ##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##      ##   ##  #####   #####  ##   ## ##   ## ##   ## ##   ## ####### ##   ##
+
+###############################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_PROGRAMMER_ORIGINAL"
+FindLine "style=\"display:inline\">Programmer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Programmer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_PROGRAMMER_TRANSLATED"
+FindLine "style=\"display:inline\">Programmer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Programmer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+ #####   #####  ######  ######  ##   ##  ##### ###### #####  ######
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ##  ##  ##   ## ##   ##
+##      ##   ## ##   ## ##   ## ##   ## ##       ##  ##   ## ##   ##
+##      ##   ## ##   ## ##   ## ##   ## ##       ##  ##   ## ######
+##      ##   ## ##   ## ##   ## ##   ## ##       ##  ##   ## ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ##  ##  ##   ## ##   ##
+ #####   #####  ##   ## ######   #####   #####   ##   #####  ##   ##
+
+####################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_CONDUCTOR_ORIGINAL"
+FindLine "style=\"display:inline\">Conductor</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Conductor</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_CONDUCTOR_TRANSLATED"
+FindLine "style=\"display:inline\">Conductor</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Conductor</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+ #####   #####  ##   ## ######  ######
+##   ## ##   ## ##   ## ##   ## ##   ##
+##      ##   ## ##   ## ##   ## ##   ##
+ #####  ##   ## ##   ## ##   ## ##   ##
+     ## ##   ## ##   ## ##   ## ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ##
+ #####   #####   #####  ##   ## ######
+
+#######################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_SOUND_ORIGINAL"
+FindLine "style=\"display:inline\">Sound</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Sound</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_SOUND_TRANSLATED"
+FindLine "style=\"display:inline\">Sound</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Sound</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+######  ######   #####  ######  ##   ##  #####  ####### ######
+##   ## ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##   ## ##   ## ##   ## ##   ## ##   ## ##      ##      ##   ##
+######  ######  ##   ## ##   ## ##   ## ##      #####   ######
+##      ##   ## ##   ## ##   ## ##   ## ##      ##      ##   ##
+##      ##   ## ##   ## ##   ## ##   ## ##   ## ##      ##   ##
+##      ##   ##  #####  ######   #####   #####  ####### ##   ##
+
+###############################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_PRODUCER_ORIGINAL"
+FindLine "style=\"display:inline\">Producer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Producer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_MAIN_CREDITS_PRODUCER_TRANSLATED"
+FindLine "style=\"display:inline\">Producer</span>" 1 1
+RegExpReplace ".*style=\"display:inline\">Producer</span>.*?<td width=\"100%\">" ""
+RegExpReplace "</td.*" ""
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+SayRest
+
+ #####  ##      ##      #####  ######  ####### ###### #### ###### #####
+##   ## ##      ##     ##   ## ##   ## ##      ##   ## ##    ##  ##   ##
+##   ## ##      ##     ##      ##   ## ##      ##   ## ##    ##  ##
+####### ##      ##     ##      ######  #####   ##   ## ##    ##   #####
+##   ## ##      ##     ##      ##   ## ##      ##   ## ##    ##       ##
+##   ## ##      ##     ##   ## ##   ## ##      ##   ## ##    ##  ##   ##
+##   ## ####### ####### #####  ##   ## ####### ###### ####   ##   #####
+
+########################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_ALL_CREDITS_ORIGINAL"
+FindLine "id=\"album_infobit_large\"" 2 1
+IfNot ""
+  MoveLine 2
+EndIf
+RegExpReplace "</td><td width=\"100%\">" ":"
+RegExpReplace "</td></tr><tr class=\"maincred\"><td nowrap=\"nowrap\">" ";"
+RegExpReplace "<tr class=\"maincred\"><td nowrap=\"nowrap\">" ""
+RegExpReplace "</td></tr>" ";"
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<span\b[^>]*\blang=\"en\"[^>]*>.*?</span>" ""
+RegExpReplace "<span class=\"label\"><b>.*?display:none\">" ""
+RegExpReplace "<span class=\"label\"><b>.*?display:inline\">" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span></b></span>" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<a.*?lang=\"ja\".*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+RegExpReplace "<b>" ""
+RegExpReplace "</b>" ""
+RegExpReplace "&nbsp;" ""
+SayRest
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+OutputTo "VGMDB_ALL_CREDITS_TRANSLATED"
+FindLine "id=\"album_infobit_large\"" 2 1
+IfNot ""
+  MoveLine 2
+EndIf
+RegExpReplace "</td><td width=\"100%\">" ":"
+RegExpReplace "</td></tr><tr class=\"maincred\"><td nowrap=\"nowrap\">" ";"
+RegExpReplace "<tr class=\"maincred\"><td nowrap=\"nowrap\">" ""
+RegExpReplace "</td></tr>" ";"
+RegExpReplace "<span style=\"display:none\"><em> / </em></span>" ""
+RegExpReplace "<span style=\"color:yellow\" title=\"Uncredited\">\*" ""
+RegExpReplace "<span\b[^>]*\blang=\"ja\"[^>]*>.*?</span>" ""
+RegExpReplace "<span class=\"label\"><b>.*?display:none\">" ""
+RegExpReplace "<span class=\"label\"><b>.*?display:inline\">" ""
+RegExpReplace "<span.*?>" ""
+RegExpReplace "</span></b></span>" ""
+RegExpReplace "<a[^>]*>(?!<)" ""
+RegExpReplace "<a.*?lang=\"en\".*?>" ""
+RegExpReplace "</span>" ""
+RegExpReplace "</a>" ""
+RegExpReplace "<b>" ""
+RegExpReplace "</b>" ""
+RegExpReplace "&nbsp;" ""
+SayRest
+
+###### ######   #####   #####  ##   ##  #####
+  ##   ##   ## ##   ## ##   ## ##   ## ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##
+  ##   ######  ####### ##      #####    #####
+  ##   ##   ## ##   ## ##      ##  ##       ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##   ##
+  ##   ##   ## ##   ##  #####  ##   ##  #####
+
+##############################################
+##############################################
+
+# Only the first 8 tracklists are scraped if they are Japanese, Romaji or English
+# Even if the first tracklist is not Japanese, Romaji or English it will be used to get the disc information
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      ####
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##         ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##         ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##        ####
+
+##########################################################################
+
+ #####  ######  ######          ###### #### #####   #####   #####
+##   ## ##   ## ##   ##         ##   ## ## ##   ## ##   ## ##   ##
+##   ## ##   ## ##   ##         ##   ## ## ##      ##      ##
+####### ##   ## ##   ##         ##   ## ##  #####  ##       #####
+##   ## ##   ## ##   ##         ##   ## ##      ## ##           ##
+##   ## ##   ## ##   ##         ##   ## ## ##   ## ##   ## ##   ##
+##   ## ##   ## ######          ###### #### #####   #####   #####
+
+##################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 1 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 1 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 1 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 1 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 1 1
+  FindInLine "<span style=\"font-size:8pt\">" 2 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_2"
+    Say "2"
+  EndIf
+  FindInLine "<span style=\"font-size:8pt\">" 1 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_3"
+    Say "3"
+  EndIf
+  FindInLine "<span style=\"font-size:8pt\">" 1 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_4"
+    Say "4"
+  EndIf
+  FindInLine "<span style=\"font-size:8pt\">" 1 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_5"
+    Say "5"
+  EndIf
+  FindInLine "<span style=\"font-size:8pt\">" 1 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_6"
+    Say "6"
+  EndIf
+  FindInLine "<span style=\"font-size:8pt\">" 1 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_7"
+    Say "7"
+  EndIf
+  FindInLine "<span style=\"font-size:8pt\">" 1 1
+  If "<b>"
+    OutputTo "VGMDB_TEMP_DISC_EXISTS_8"
+    Say "8"
+  EndIf
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 1 1
+  FindInLine "<b>" 1 1
+  OutputTo "VGMDB_TEMP_DISC_TITLE_1"
+  SayUntil "</b>"
+  If "</b></span><span class=\"label\""
+    FindInLine "\">" 1 1
+    OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+    SayUntil "</span>"
+  EndIf
+  OutputTo "VGMDB_DISC_TITLE"
+  SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+  IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+    OutputTo "VGMDB_DISC_CLASSIFICATION"
+    SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+  EndIf
+  OutputTo "VGMDB_DISC_NUMBER"
+  Say "1"
+  FindInLine "</tr>" 1 1
+  Do
+    OutputTo "VGMDB_DISC_TITLE"
+    Say "|"
+    SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+    IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+      OutputTo "VGMDB_DISC_CLASSIFICATION"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+    EndIf
+    OutputTo "VGMDB_DISC_NUMBER"
+    Say "|1"
+    FindInLine "</tr>" 1 1
+  While "<tr"
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_2"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 2 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_2"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_2"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|2"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_3"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 3 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_3"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_3"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|3"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_4"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 4 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_4"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_4"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|4"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_5"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 5 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_5"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_5"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|5"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_6"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 6 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_6"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_6"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|6"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_7"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 7 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_7"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_7"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|7"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_8"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 8 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_8"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+      SayUntil "</span>"
+    EndIf
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_8"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|8"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+  EndIf
+  OutputTo "VGMDB_DISC_NUMBER"
+  Say "|"
+Else
+  If "English<"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    JoinUntil "</h4></span>"
+    RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+    FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+    Do
+      OutputTo "VGMDB_TRACK_NUMBER_ENG"
+      SayUntil "</span>"
+      MoveChar -2
+      If "0"
+        MoveChar 1
+      EndIf
+      If "0"
+        MoveChar 1
+      EndIf
+      If "0"
+        MoveChar 1
+      EndIf
+      FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+    While "|"
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    Say "|"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+    FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+    Do
+      OutputTo "VGMDB_TRACK_TITLE_ENG"
+      SayUntil "</td>"
+      FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+    While "|"
+    Say "|"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+    OutputTo "VGMDB_TRACK_DURATION_ENG"
+    If "<"
+      Say "0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+    Do
+      If "|<"
+        Say "|0"
+      Else
+        SayUntil "</span>"
+      EndIf
+      FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+    While "|"
+    Say "|"
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<span style=\"font-size:8pt\">" 2 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_2"
+      Say "2"
+    EndIf
+    FindInLine "<span style=\"font-size:8pt\">" 1 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_3"
+      Say "3"
+    EndIf
+    FindInLine "<span style=\"font-size:8pt\">" 1 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_4"
+      Say "4"
+    EndIf
+    FindInLine "<span style=\"font-size:8pt\">" 1 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_5"
+      Say "5"
+    EndIf
+    FindInLine "<span style=\"font-size:8pt\">" 1 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_6"
+      Say "6"
+    EndIf
+    FindInLine "<span style=\"font-size:8pt\">" 1 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_7"
+      Say "7"
+    EndIf
+    FindInLine "<span style=\"font-size:8pt\">" 1 1
+    If "<b>"
+      OutputTo "VGMDB_TEMP_DISC_EXISTS_8"
+      Say "8"
+    EndIf
+    GoToLine 1
+    FindLine "<!-- main page contents -->"
+    FindLine "<!-- / tracklist tools menu -->" 1 1
+    FindInLine "<b>" 1 1
+    OutputTo "VGMDB_TEMP_DISC_TITLE_1"
+    SayUntil "</b>"
+    If "</b></span><span class=\"label\""
+      FindInLine "\">" 1 1
+      OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+      SayUntil "</span>"
+    EndIf
+    OutputTo "VGMDB_DISC_TITLE"
+    SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+    IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+      OutputTo "VGMDB_DISC_CLASSIFICATION"
+      SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+    EndIf
+    OutputTo "VGMDB_DISC_NUMBER"
+    Say "1"
+    FindInLine "</tr>" 1 1
+    Do
+      OutputTo "VGMDB_DISC_TITLE"
+      Say "|"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|1"
+      FindInLine "</tr>" 1 1
+    While "<tr"
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_2"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 2 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_2"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_2"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|2"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_3"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 3 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_3"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_3"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|3"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_4"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 4 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_4"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_4"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|4"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_5"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 5 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_5"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_5"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|5"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_6"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 6 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_6"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_6"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|6"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_7"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 7 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_7"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_7"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|7"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_8"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 8 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_8"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+        SayUntil "</span>"
+      EndIf
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_8"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|8"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+    EndIf
+    OutputTo "VGMDB_DISC_NUMBER"
+    Say "|"
+  Else
+    If "Romaji<"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      JoinUntil "</h4></span>"
+      RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+      FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+      Do
+        OutputTo "VGMDB_TRACK_NUMBER_ROM"
+        SayUntil "</span>"
+        MoveChar -2
+        If "0"
+          MoveChar 1
+        EndIf
+        If "0"
+          MoveChar 1
+        EndIf
+        If "0"
+          MoveChar 1
+        EndIf
+        FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+      While "|"
+      OutputTo "VGMDB_TRACK_NUMBER_ROM"
+      Say "|"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+      FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+      Do
+        OutputTo "VGMDB_TRACK_TITLE_ROM"
+        SayUntil "</td>"
+        FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+      While "|"
+      Say "|"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+      FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+      OutputTo "VGMDB_TRACK_DURATION_ROM"
+      If "<"
+        Say "0"
+      Else
+        SayUntil "</span>"
+      EndIf
+      FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+      Do
+        If "|<"
+          Say "|0"
+        Else
+          SayUntil "</span>"
+        EndIf
+        FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+      While "|"
+      Say "|"
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<span style=\"font-size:8pt\">" 2 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_2"
+        Say "2"
+      EndIf
+      FindInLine "<span style=\"font-size:8pt\">" 1 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_3"
+        Say "3"
+      EndIf
+      FindInLine "<span style=\"font-size:8pt\">" 1 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_4"
+        Say "4"
+      EndIf
+      FindInLine "<span style=\"font-size:8pt\">" 1 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_5"
+        Say "5"
+      EndIf
+      FindInLine "<span style=\"font-size:8pt\">" 1 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_6"
+        Say "6"
+      EndIf
+      FindInLine "<span style=\"font-size:8pt\">" 1 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_7"
+        Say "7"
+      EndIf
+      FindInLine "<span style=\"font-size:8pt\">" 1 1
+      If "<b>"
+        OutputTo "VGMDB_TEMP_DISC_EXISTS_8"
+        Say "8"
+      EndIf
+      GoToLine 1
+      FindLine "<!-- main page contents -->"
+      FindLine "<!-- / tracklist tools menu -->" 1 1
+      FindInLine "<b>" 1 1
+      OutputTo "VGMDB_TEMP_DISC_TITLE_1"
+      SayUntil "</b>"
+      If "</b></span><span class=\"label\""
+        FindInLine "\">" 1 1
+        OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+        SayUntil "</span>"
+      EndIf
+      OutputTo "VGMDB_DISC_TITLE"
+      SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+      IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+        OutputTo "VGMDB_DISC_CLASSIFICATION"
+        SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "1"
+      FindInLine "</tr>" 1 1
+      Do
+        OutputTo "VGMDB_DISC_TITLE"
+        Say "|"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|1"
+        FindInLine "</tr>" 1 1
+      While "<tr"
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_2"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 2 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_2"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_2"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|2"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_3"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 3 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_3"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_3"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|3"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_4"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 4 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_4"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_4"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|4"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_5"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 5 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_5"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_5"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|5"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_6"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 6 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_6"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_6"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|6"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_7"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 7 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_7"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_7"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|7"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_8"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 8 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_8"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+          SayUntil "</span>"
+        EndIf
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_8"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|8"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|"
+    Else
+      If "Japanese<"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        JoinUntil "</h4></span>"
+        RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+        FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+        Do
+          OutputTo "VGMDB_TRACK_NUMBER_JAP"
+          SayUntil "</span>"
+          MoveChar -2
+          If "0"
+            MoveChar 1
+          EndIf
+          If "0"
+            MoveChar 1
+          EndIf
+          If "0"
+            MoveChar 1
+          EndIf
+          FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+        While "|"
+        OutputTo "VGMDB_TRACK_NUMBER_JAP"
+        Say "|"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+        FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+        Do
+          OutputTo "VGMDB_TRACK_TITLE_JAP"
+          SayUntil "</td>"
+          FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+        While "|"
+        Say "|"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+        FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+        OutputTo "VGMDB_TRACK_DURATION_JAP"
+        If "<"
+          Say "0"
+        Else
+          SayUntil "</span>"
+        EndIf
+        FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+        Do
+          If "|<"
+            Say "|0"
+          Else
+            SayUntil "</span>"
+          EndIf
+          FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+        While "|"
+        Say "|"
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<span style=\"font-size:8pt\">" 2 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_2"
+          Say "2"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_3"
+          Say "3"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_4"
+          Say "4"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_5"
+          Say "5"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_6"
+          Say "6"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_7"
+          Say "7"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_8"
+          Say "8"
+        EndIf
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 1 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_1"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          SayUntil "</span>"
+        EndIf
+        OutputTo "VGMDB_DISC_TITLE"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "1"
+        FindInLine "</tr>" 1 1
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|1"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_2"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 2 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_2"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_2"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|2"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_3"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 3 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_3"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_3"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|3"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_4"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 4 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_4"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_4"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|4"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_5"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 5 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_5"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_5"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|5"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_6"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 6 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_6"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_6"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|6"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_7"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 7 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_7"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_7"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|7"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_8"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 8 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_8"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_8"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|8"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "|"
+      Else
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        JoinUntil "</h4></span>"
+        FindInLine "<span style=\"font-size:8pt\">" 2 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_2"
+          Say "2"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_3"
+          Say "3"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_4"
+          Say "4"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_5"
+          Say "5"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_6"
+          Say "6"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_7"
+          Say "7"
+        EndIf
+        FindInLine "<span style=\"font-size:8pt\">" 1 1
+        If "<b>"
+          OutputTo "VGMDB_TEMP_DISC_EXISTS_8"
+          Say "8"
+        EndIf
+        GoToLine 1
+        FindLine "<!-- main page contents -->"
+        FindLine "<!-- / tracklist tools menu -->" 1 1
+        FindInLine "<b>" 1 1
+        OutputTo "VGMDB_TEMP_DISC_TITLE_1"
+        SayUntil "</b>"
+        If "</b></span><span class=\"label\""
+          FindInLine "\">" 1 1
+          OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          SayUntil "</span>"
+        EndIf
+        OutputTo "VGMDB_DISC_TITLE"
+        SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+        IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          OutputTo "VGMDB_DISC_CLASSIFICATION"
+          SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+        EndIf
+        OutputTo "VGMDB_DISC_NUMBER"
+        Say "1"
+        FindInLine "</tr>" 1 1
+        Do
+          OutputTo "VGMDB_DISC_TITLE"
+          Say "|"
+          SayOutput "VGMDB_TEMP_DISC_TITLE_1"
+          IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+            OutputTo "VGMDB_DISC_CLASSIFICATION"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_1"
+          EndIf
+          OutputTo "VGMDB_DISC_NUMBER"
+          Say "|1"
+          FindInLine "</tr>" 1 1
+        While "<tr"
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_2"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 2 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_2"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_2"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_2"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|2"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_3"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 3 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_3"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_3"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_3"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|3"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_4"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 4 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_4"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_4"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_4"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|4"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_5"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 5 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_5"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_5"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_5"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|5"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_6"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 6 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_6"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_6"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_6"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|6"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_7"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 7 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_7"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_7"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_7"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|7"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_8"
+          GoToLine 1
+          FindLine "<!-- main page contents -->"
+          FindLine "<!-- / tracklist tools menu -->" 1 1
+          FindInLine "<b>" 8 1
+          OutputTo "VGMDB_TEMP_DISC_TITLE_8"
+          SayUntil "</b>"
+          If "</b></span><span class=\"label\""
+            FindInLine "\">" 1 1
+            OutputTo "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+            SayUntil "</span>"
+          EndIf
+          Do
+            OutputTo "VGMDB_DISC_TITLE"
+            Say "|"
+            SayOutput "VGMDB_TEMP_DISC_TITLE_8"
+            IfOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+              OutputTo "VGMDB_DISC_CLASSIFICATION"
+              Say "|"
+              SayOutput "VGMDB_TEMP_DISC_CLASSIFICATION_8"
+            EndIf
+            OutputTo "VGMDB_DISC_NUMBER"
+            Say "|8"
+            FindInLine "</tr>" 1 1
+          While "<tr"
+        EndIf
+      EndIf
+      OutputTo "VGMDB_DISC_NUMBER"
+      Say "|"
+    EndIf
+  EndIf
+EndIf
+
+IfOutput "VGMDB_TEMP_DISC_EXISTS_8"
+  OutputTo "VGMDB_TOTALDISCS"
+  Say "8"
+Else
+  IfOutput "VGMDB_TEMP_DISC_EXISTS_7"
+    OutputTo "VGMDB_TOTALDISCS"
+    Say "7"
+  Else
+    IfOutput "VGMDB_TEMP_DISC_EXISTS_6"
+      OutputTo "VGMDB_TOTALDISCS"
+      Say "6"
+    Else
+      IfOutput "VGMDB_TEMP_DISC_EXISTS_5"
+        OutputTo "VGMDB_TOTALDISCS"
+        Say "5"
+      Else
+        IfOutput "VGMDB_TEMP_DISC_EXISTS_4"
+          OutputTo "VGMDB_TOTALDISCS"
+          Say "4"
+        Else
+          IfOutput "VGMDB_TEMP_DISC_EXISTS_3"
+            OutputTo "VGMDB_TOTALDISCS"
+            Say "3"
+          Else
+            IfOutput "VGMDB_TEMP_DISC_EXISTS_2"
+              OutputTo "VGMDB_TOTALDISCS"
+              Say "2"
+            Else
+              OutputTo "VGMDB_TOTALDISCS"
+              Say "1"
+            EndIf
+          EndIf
+        EndIf
+      EndIf
+    EndIf
+  EndIf
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      #### ####
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##         ##   ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##         ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##   ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##        #### ####
+
+###############################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 2 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 2 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      #### #### ####
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##   ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##         ##   ##   ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##         ##   ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ##   ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##   ##   ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##        #### #### ####
+
+####################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 3 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 3 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      #### ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##  ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##         ##  ##   ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##         ##  ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ##   ## ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ##   ## ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##        ####   ###
+
+##################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 4 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 4 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##        ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##        ##   ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##        ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ## ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ## ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##          ###
+
+#############################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 5 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 5 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      ##   ## ####
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##        ##   ##  ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##        ##   ##  ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##        ##   ##  ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ## ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ## ##   ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##          ###   ####
+
+##################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 6 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 6 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      ##   ## #### ####
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##        ##   ##  ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##        ##   ##  ##   ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##        ##   ##  ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ## ##   ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ## ##   ##   ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##          ###   #### ####
+
+#######################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 7 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 7 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+###### ######   #####   #####  ##   ## ##      #### ##### ######      ##   ## #### #### ####
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##        ##   ##  ##   ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ## ##       ##        ##   ##  ##   ##   ##
+  ##   ######  ####### ##      #####   ##       ##  #####   ##        ##   ##  ##   ##   ##
+  ##   ##   ## ##   ## ##      ##  ##  ##       ##      ##  ##         ## ##   ##   ##   ##
+  ##   ##   ## ##   ## ##   ## ##   ## ##       ## ##   ##  ##         ## ##   ##   ##   ##
+  ##   ##   ## ##   ##  #####  ##   ## ####### #### #####   ##          ###   #### #### ####
+
+############################################################################################
+
+GoToLine 1
+FindLine "<!-- main page contents -->"
+FindLine "id=\"tlnav\"" 1 1
+FindInLine "#'>" 8 1
+If "English (Official)<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENGOFF"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENGOFF"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENGOFF"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "English<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ENG"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ENG"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ENG"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ENG"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Romaji<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_ROM"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_ROM"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_ROM"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_ROM"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+If "Japanese<"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  JoinUntil "</h4></span>"
+  RegExpReplace "class=\"smallfont\"><span class=\"label\">" "class=\"smallfont\"><span class=\"label\"|"
+  FindInLine "class=\"smallfont\"><span class=\"label\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_NUMBER_JAP"
+    SayUntil "</span>"
+    MoveChar -2
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    If "0"
+      MoveChar 1
+    EndIf
+    FindInLine "class=\"smallfont\"><span class=\"label\"" 1 1
+  While "|"
+  OutputTo "VGMDB_TRACK_NUMBER_JAP"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "width=\"100%\" colspan=\"2\">" "width=\"100%\" colspan=\"2\"|"
+  FindInLine "width=\"100%\" colspan=\"2\"|" 1 1
+  Do
+    OutputTo "VGMDB_TRACK_TITLE_JAP"
+    SayUntil "</td>"
+    FindInLine "width=\"100%\" colspan=\"2\"" 1 1
+  While "|"
+  Say "|"
+  GoToLine 1
+  FindLine "<!-- main page contents -->"
+  FindLine "<!-- / tracklist tools menu -->" 8 1
+  RegExpReplace "nowrap=\"nowrap\"><span class=\"time\">" "nowrap=\"nowrap\"><span class=\"time\"|"
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"|" 1 1
+  OutputTo "VGMDB_TRACK_DURATION_JAP"
+  If "<"
+    Say "0"
+  Else
+    SayUntil "</span>"
+  EndIf
+  FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  Do
+    If "|<"
+      Say "|0"
+    Else
+      SayUntil "</span>"
+    EndIf
+    FindInLine "nowrap=\"nowrap\"><span class=\"time\"" 1 1
+  While "|"
+  Say "|"
+EndIf
+
+ #####   #####  ######  ###### #### ######   #####
+## # ## ##   ## ##   ## ##   ## ##  ##   ## ##   ##
+## # ## ##   ## ##   ## ##   ## ##  ##   ## ##
+## # ## ####### ######  ######  ##  ##   ## ## ###
+##   ## ##   ## ##      ##      ##  ##   ## ##   ##
+##   ## ##   ## ##      ##      ##  ##   ## ##   ##
+##   ## ##   ## ##      ##     #### ##   ##  #####
+
+###################################################
+###################################################
+
+# Available fields
+#
+# * ALBUM
+#   * VGMDB_ALBUM_TITLE_JA
+#   * VGMDB_ALBUM_TITLE_JA_LATN
+#   * VGMDB_ALBUM_TITLE_EN
+#   * VGMDB_CATALOG_NUMBER
+#   * VGMDB_BARCODE
+#   * VGMDB_RELEASE_DATE
+#   * VGMDB_RELEASE_DATE_YEAR
+#   * VGMDB_RELEASE_EVENT
+#   * VGMDB_MEDIA_FORMAT
+#   * VGMDB_CLASSIFICATION
+#   * VGMDB_LABEL
+#   * VGMDB_MANUFACTURER
+#   * VGMDB_DISTRIBUTOR
+#   * VGMDB_PUBLISHER
+#   * VGMDB_PHONOGRAPHIC_COPYRIGHT
+#   * VGMDB_CATEGORY
+#   * VGMDB_PRODUCTS_REPRESENTED_EN
+#   * VGMDB_PRODUCTS_REPRESENTED_JA
+#   * VGMDB_PRODUCTS_REPRESENTED_JA_LATN
+#   * VGMDB_NOTES
+#   * VGMDB_URL
+#
+# * CREDITS
+#   * VGMDB_MAIN_CREDITS_MUSIC_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_MUSIC_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_COMPOSER_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_COMPOSER_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_WRITER_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_WRITER_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_ARRANGER_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_ARRANGER_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_PERFORMER_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_PERFORMER_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_VOCALS_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_VOCALS_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_LYRICIST_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_LYRICIST_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_PROGRAMMER_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_PROGRAMMER_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_CONDUCTOR_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_CONDUCTOR_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_SOUND_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_SOUND_TRANSLATED
+#   * VGMDB_MAIN_CREDITS_PRODUCER_ORIGINAL
+#   * VGMDB_MAIN_CREDITS_PRODUCER_TRANSLATED
+#   * VGMDB_ALL_CREDITS_ORIGINAL
+#   * VGMDB_ALL_CREDITS_TRANSLATED
+#
+# * DISCS
+#   * VGMDB_DISC_TITLE
+#   * VGMDB_DISC_CLASSIFICATION
+#   * VGMDB_DISC_NUMBER
+#   * VGMDB_TOTALDISCS
+#
+# * TRACKS
+#   * VGMDB_TRACK_NUMBER_ENGOFF
+#   * VGMDB_TRACK_NUMBER_ENG
+#   * VGMDB_TRACK_NUMBER_ROM
+#   * VGMDB_TRACK_NUMBER_JAP
+#   * VGMDB_TRACK_TITLE_ENGOFF
+#   * VGMDB_TRACK_TITLE_ENG
+#   * VGMDB_TRACK_TITLE_ROM
+#   * VGMDB_TRACK_TITLE_JAP
+#   * VGMDB_TRACK_DURATION_ENGOFF
+#   * VGMDB_TRACK_DURATION_ENG
+#   * VGMDB_TRACK_DURATION_ROM
+#   * VGMDB_TRACK_DURATION_JAP
+#   * VGMDB_TOTALTRACKS
+
+# TOTALDISCS : VGMDB_TOTALDISCS
+
+OutputTo "TOTALDISCS"
+IfOutput "VGMDB_TOTALDISCS"
+  SayOutput "VGMDB_TOTALDISCS"
+EndIf
+
+# TRACK : VGMDB_TRACK_NUMBER_ROM >
+#         VGMDB_TRACK_NUMBER_ENGOFF >
+#         VGMDB_TRACK_NUMBER_ENG >
+#         VGMDB_TRACK_NUMBER_JAP
+
+OutputTo "TRACK"
+IfOutput "VGMDB_TRACK_NUMBER_ENGOFF"
+  SayOutput "VGMDB_TRACK_NUMBER_ENGOFF"
+Else
+  IfOutput "VGMDB_TRACK_NUMBER_ENG"
+    SayOutput "VGMDB_TRACK_NUMBER_ENG"
+  Else
+    IfOutput "VGMDB_TRACK_NUMBER_ROM"
+      SayOutput "VGMDB_TRACK_NUMBER_ROM"
+      Else
+        IfOutput "VGMDB_TRACK_NUMBER_JAP"
+          SayOutput "VGMDB_TRACK_NUMBER_JAP"
+        EndIf
+    EndIf
+  EndIf
+EndIf
+
+# TRACKS : VGMDB_TRACK_TITLE_ROM >
+#          VGMDB_TRACK_TITLE_ENGOFF >
+#          VGMDB_TRACK_TITLE_ENG >
+#          VGMDB_TRACK_TITLE_JAP
+
+OutputTo "TRACKS"
+IfOutput "VGMDB_TRACK_TITLE_ENGOFF"
+  SayOutput "VGMDB_TRACK_TITLE_ENGOFF"
+Else
+  IfOutput "VGMDB_TRACK_TITLE_ENG"
+    SayOutput "VGMDB_TRACK_TITLE_ENG"
+  Else
+    IfOutput "VGMDB_TRACK_TITLE_ROM"
+      SayOutput "VGMDB_TRACK_TITLE_ROM"
+    Else
+      IfOutput "VGMDB_TRACK_TITLE_JAP"
+        SayOutput "VGMDB_TRACK_TITLE_JAP"
+      EndIf
+    EndIf
+  EndIf
+EndIf
+
+# TOTALTRACKS: VGMDB_TOTALTRACKS
+
+RegExpReplace "^.*" "%tracks%"
+RegExpReplace "[^|]" ""
+Replace "|" "\"|\","
+RegExpReplace "^.*" "{\"array\":[${0}]}"
+Replace ",]" "]"
+json "on" "current"
+json_select_many_count "array"
+SET "VGMDB_TOTALTRACKS"
+OutputTo "VGMDB_TOTALTRACKS"
+SayRest
+json "off"
+OutputTo "TOTALTRACKS"
+SayOutput "VGMDB_TOTALTRACKS"
+
+# ALBUM : VGMDB_ALBUM_TITLE_JA_LATN >
+#         VGMDB_ALBUM_TITLE_EN >
+#         VGMDB_ALBUM_TITLE_JA
+
+OutputTo "ALBUM"
+IfOutput "VGMDB_ALBUM_TITLE_EN"
+  SayOutput "VGMDB_ALBUM_TITLE_EN"
+Else
+  IfOutput "VGMDB_ALBUM_TITLE_JA_LATN"
+    SayOutput "VGMDB_ALBUM_TITLE_JA_LATN"
+  Else
+    IfOutput "VGMDB_ALBUM_TITLE_JA"
+      SayOutput "VGMDB_ALBUM_TITLE_JA"
+    EndIf
+  EndIf
+EndIf
+
+# ALBUMSORT : ALBUM
+
+OutputTo "ALBUMSORT"
+SayOutput "ALBUM"
+
+# ALBUMARTIST : VGMDB_MAIN_CREDITS_VOCALS_TRANSLATED >
+#               VGMDB_MAIN_CREDITS_PERFORMER_TRANSLATED >
+#               VGMDB_MAIN_CREDITS_MUSIC_TRANSLATED
+
+OutputTo "ALBUMARTIST"
+IfOutput "VGMDB_MAIN_CREDITS_VOCALS_TRANSLATED"
+  SayOutput "VGMDB_MAIN_CREDITS_VOCALS_TRANSLATED"
+Else
+  IfOutput "VGMDB_MAIN_CREDITS_PERFORMER_TRANSLATED"
+    SayOutput "VGMDB_MAIN_CREDITS_PERFORMER_TRANSLATED"
+  Else
+    IfOutput "VGMDB_MAIN_CREDITS_MUSIC_TRANSLATED"
+      SayOutput "VGMDB_MAIN_CREDITS_MUSIC_TRANSLATED"
+    EndIf
+  EndIf
+EndIf
+
+# ALBUMARTISTSORT : ALBUMARTIST
+
+OutputTo "ALBUMARTISTSORT"
+SayOutput "ALBUMARTIST"
+
+# ARTIST : ALBUMARTIST
+
+OutputTo "ARTIST"
+SayOutput "ALBUMARTIST"
+
+# ARTISTSORT : ARTIST
+
+OutputTo "ARTISTSORT"
+SayOutput "ARTIST"
+
+# BARCODE : VGMDB_BARCODE
+
+OutputTo "BARCODE"
+SayOutput "VGMDB_BARCODE"
+
+# CATALOGNUMBER : VGMDB_CATALOG_NUMBER
+
+OutputTo "CATALOGNUMBER"
+SayOutput "VGMDB_CATALOG_NUMBER"
+
+# COMMENT : VGMDB_NOTES
+
+OutputTo "COMMENT"
+SayOutput "VGMDB_NOTES"
+
+# COMPOSER : VGMDB_MAIN_CREDITS_COMPOSER_TRANSLATED
+
+OutputTo "COMPOSER"
+SayOutput "VGMDB_MAIN_CREDITS_COMPOSER_TRANSLATED"
+
+# COMPOSERSORT : COMPOSER
+
+OutputTo "COMPOSERSORT"
+SayOutput "COMPOSER"
+
+# CONDUCTOR : VGMDB_MAIN_CREDITS_CONDUCTOR_TRANSLATED
+
+OutputTo "CONDUCTOR"
+SayOutput "VGMDB_MAIN_CREDITS_CONDUCTOR_TRANSLATED"
+
+# CONTENTGROUP : VGMDB_PRODUCTS_REPRESENTED_JA_LATN >
+#                VGMDB_PRODUCTS_REPRESENTED_EN >
+#                VGMDB_PRODUCTS_REPRESENTED_JA
+
+OutputTo "CONTENTGROUP"
+IfOutput "VGMDB_PRODUCTS_REPRESENTED_JA_LATN"
+  SayOutput "VGMDB_PRODUCTS_REPRESENTED_JA_LATN"
+Else
+  IfOutput "VGMDB_PRODUCTS_REPRESENTED_EN"
+    SayOutput "VGMDB_PRODUCTS_REPRESENTED_EN"
+  Else
+    IfOutput "VGMDB_PRODUCTS_REPRESENTED_JA"
+      SayOutput "VGMDB_PRODUCTS_REPRESENTED_JA"
+    EndIf
+  EndIf
+EndIf
+
+# COPYRIGHT : VGMDB_PHONOGRAPHIC_COPYRIGHT
+
+OutputTo "COPYRIGHT"
+SayOutput "VGMDB_PHONOGRAPHIC_COPYRIGHT"
+
+# DESCRIPTION : COMMENT
+
+OutputTo "DESCRIPTION"
+SayOutput "COMMENT"
+
+# DISCNUMBER : VGMDB_DISC_NUMBER
+
+OutputTo "DISCNUMBER"
+SayOutput "VGMDB_DISC_NUMBER"
+
+# DISTRIBUTOR : VGMDB_DISTRIBUTOR
+
+OutputTo "DISTRIBUTOR"
+SayOutput "VGMDB_DISTRIBUTOR"
+
+# GENRE : VGMDB_DISC_CLASSIFICATION >
+#         VGMDB_CLASSIFICATION
+
+OutputTo "GENRE"
+IfOutput "VGMDB_DISC_CLASSIFICATION"
+  SayOutput "VGMDB_DISC_CLASSIFICATION"
+Else
+  IfOutput "VGMDB_CLASSIFICATION"
+    SayOutput "VGMDB_CLASSIFICATION"
+  EndIf
+EndIf
+
+# GROUPING : VGMDB_CATEGORY
+
+OutputTo "GROUPING"
+SayOutput "VGMDB_CATEGORY"
+
+# INVOLVEDPEOPLE : VGMDB_ALL_CREDITS_TRANSLATED
+
+OutputTo "INVOLVEDPEOPLE"
+SayOutput "VGMDB_ALL_CREDITS_TRANSLATED"
+
+# LYRICIST : VGMDB_MAIN_CREDITS_LYRICIST_TRANSLATED
+
+OutputTo "LYRICIST"
+SayOutput "VGMDB_MAIN_CREDITS_LYRICIST_TRANSLATED"
+
+# MEDIATYPE : VGMDB_MEDIA_FORMAT
+
+OutputTo "MEDIATYPE"
+SayOutput "VGMDB_MEDIA_FORMAT"
+
+# PUBLISHER : VGMDB_PUBLISHER
+
+OutputTo "PUBLISHER"
+SayOutput "VGMDB_PUBLISHER"
+
+# MANUFACTURER : VGMDB_MANUFACTURER
+
+OutputTo "MANUFACTURER"
+SayOutput "VGMDB_MANUFACTURER"
+
+# LABEL : VGMDB_LABEL
+
+OutputTo "LABEL"
+SayOutput "VGMDB_LABEL"
+
+# WWW : VGMDB_URL
+
+OutputTo "WWW"
+SayOutput "VGMDB_URL"
+
+# YEAR : VGMDB_RELEASE_DATE_YEAR
+
+OutputTo "YEAR"
+SayOutput "VGMDB_RELEASE_DATE_YEAR"

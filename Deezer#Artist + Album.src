@@ -1,0 +1,827 @@
+﻿################################################################################
+# Mp3tag Tag Source for Deezer v1.2                                            #
+#                                                                              #
+# Created by vikaesar                                                          #
+#                                                                              #
+# KNOWN ISSUES: Genre information can't be parsed as it is not provided        #
+#               by Deezer.                                                     #
+#                                                                              #
+#               When parsing multi-disc albums with more than 20 discs         #
+#               then the total tracks for every disc past the twentieth        #
+#               one aren't parsed, so their %track% field won't follow         #
+#               this pattern: "track number/total tracks", it will just        #
+#               show the track number.                                         #
+#                                                                              #
+# INSTRUCTIONS: This file needs to be stored in Mp3tag's tag sources           #
+#               directory:                                                     #
+#               %APPDATA%\Mp3tag\data\sources                                  #
+#                                                                              #
+# CHANGELOG                                                                    #
+#                                                                              #
+# [2019-05-25]  v1.00  Initial release                                         #
+# [2022-12-19]  v1.10  Add track "version" to title instead of comment		   #
+# [2024-05-01]  v1.20  Add ReplayGain tag                                      #
+################################################################################
+
+[Name]=Deezer
+[BasedOn]=www.deezer.com
+[IndexUrl]=https://www.deezer.com/search/%s
+[AlbumUrl]=https://www.deezer.com/en/album/
+[WordSeparator]=%20
+[IndexFormat]=%_url%|%Album%|%Artist%|%Year%
+[SearchBy]=%Artist% %Album%
+[Encoding]=url-utf-8
+
+
+################################################################################
+#                        LIST OF SEARCH RESULTS DIALOG                         #
+################################################################################
+[ParserScriptIndex]=...
+
+## Comment/uncomment for debugging purposes:
+# DebugWriteInput "C:\Users\your_username\Desktop\mp3tag-deezer-ws-index-debug.out.html"
+# Debug "ON" "C:\Users\your_username\Desktop\mp3tag-deezer-ws-index-debug.txt"
+
+FindLine "<script>window.__DZR_APP_STATE__"
+RegexpReplace ".+<script>.+ = " ""
+RegexpReplace "</script>.+</div>" ""
+
+json "ON" "current"
+
+## First, check if we've found anything
+json_select_object "ALBUM"
+json_select "count"
+
+## Then iterate over all releases
+ifnot "0"
+	json_foreach "data"
+
+		# URL
+		json_select "ALB_ID"
+		SayRest
+		Say "|"
+
+		# Album
+		json_select "ALB_TITLE"
+		SayRest
+		Say "|"
+
+		# Artist
+		json_select "ART_NAME"
+		SayRest
+		Say "|"
+
+		# Year
+		json_select "PHYSICAL_RELEASE_DATE"
+		SayRest
+
+		SayNewline
+
+	json_foreach_end
+endif
+
+
+################################################################################
+#                        ADJUST TAG INFORMATION DIALOG                         #
+################################################################################
+[ParserScriptAlbum]=...
+
+## Comment/uncomment for debugging purposes:
+# DebugWriteInput "C:\Users\your_username\Desktop\mp3tag-deezer-ws-album-debug.out.html"
+# Debug "ON" "C:\Users\your_username\Desktop\mp3tag-deezer-ws-album-debug.txt"
+
+FindLine "<script>window.__DZR_APP_STATE__"
+RegexpReplace ".+<script>.+ = " ""
+RegexpReplace "</script>.*" ""
+
+json "ON" "current"
+
+## First, parse album data
+json_select_object "DATA"
+
+# Album artist
+json_select "ART_NAME"
+if "Various Artists"
+	OutputTo "COMPILATION"
+	Say "1"
+endif
+OutputTo "ALBUMARTIST"
+SayRest
+
+# Publisher
+OutputTo "PUBLISHER"
+json_select "LABEL_NAME"
+SayRest
+
+# Album
+OutputTo "ALBUM"
+json_select "ALB_TITLE"
+SayRest
+
+# Cover
+OutputTo "COVERURL"
+json_select "ALB_PICTURE"
+Say "https://e-cdns-images.dzcdn.net/images/cover/"
+SayRest
+## You can choose the cover resolution here, up to 1200px x 1200px
+Say "/1200x1200.jpg"
+#Say "/512x512.jpg"
+
+# Release date
+OutputTo "YEAR"
+json_select "PHYSICAL_RELEASE_DATE"
+## A) Full date, e.g. 2018-09-26
+#SayRest
+## B) Year only, e.g. 2018
+SayUntil "-"
+
+# UPC
+OutputTo "UPC"
+json_select "UPC"
+SayRest
+
+
+## Then iterate over all tracks
+json_unselect_object
+json_select_object "SONGS"
+
+# Track count
+OutputTo "TEMP_TotalTracks"
+json_select "total"
+SayRest
+
+# Disc count
+Set "TOTALDISCS" "1"
+json_foreach "data"
+	OutputTo "TOTALDISCS"
+	json_select "DISK_NUMBER"
+	ifnot ""
+		ifnotoutput "TEMP_Multidisc"
+			ifnot "1"
+				Set "TEMP_Multidisc" "1"
+			endif
+		endif
+		Set "TOTALDISCS"
+		SayRest
+	endif
+json_foreach_end
+
+# Multi-disc track count
+ifoutput "TEMP_Multidisc"
+	json_unselect_object
+	json_select_object "SONGS"
+	json_foreach "data"
+		json_select "DISK_NUMBER"
+		if "1"
+			## Avoid overwriting Disc 1 total tracks with Disc 10, 11, etc
+			ifnotoutput "TEMP_Disc_9_TotalTracks"
+				OutputTo "TEMP_Disc_1_TotalTracks"
+				Set "TEMP_Disc_1_TotalTracks"
+				json_select "TRACK_NUMBER"
+				SayRest
+			else
+				if "10"
+					OutputTo "TEMP_Disc_10_TotalTracks"
+					Set "TEMP_Disc_10_TotalTracks"
+					json_select "TRACK_NUMBER"
+					SayRest
+				else
+					if "11"
+						OutputTo "TEMP_Disc_11_TotalTracks"
+						Set "TEMP_Disc_11_TotalTracks"
+						json_select "TRACK_NUMBER"
+						SayRest
+					else
+						if "12"
+							OutputTo "TEMP_Disc_12_TotalTracks"
+							Set "TEMP_Disc_12_TotalTracks"
+							json_select "TRACK_NUMBER"
+							SayRest
+						else
+							if "13"
+								OutputTo "TEMP_Disc_13_TotalTracks"
+								Set "TEMP_Disc_13_TotalTracks"
+								json_select "TRACK_NUMBER"
+								SayRest
+							else
+								if "14"
+									OutputTo "TEMP_Disc_14_TotalTracks"
+									Set "TEMP_Disc_14_TotalTracks"
+									json_select "TRACK_NUMBER"
+									SayRest
+								else
+									if "15"
+										OutputTo "TEMP_Disc_15_TotalTracks"
+										Set "TEMP_Disc_15_TotalTracks"
+										json_select "TRACK_NUMBER"
+										SayRest
+									else
+										if "16"
+											OutputTo "TEMP_Disc_16_TotalTracks"
+											Set "TEMP_Disc_16_TotalTracks"
+											json_select "TRACK_NUMBER"
+											SayRest
+										else
+											if "17"
+												OutputTo "TEMP_Disc_17_TotalTracks"
+												Set "TEMP_Disc_17_TotalTracks"
+												json_select "TRACK_NUMBER"
+												SayRest
+											else
+												if "18"
+													OutputTo "TEMP_Disc_18_TotalTracks"
+													Set "TEMP_Disc_18_TotalTracks"
+													json_select "TRACK_NUMBER"
+													SayRest
+												else
+													if "19"
+														OutputTo "TEMP_Disc_19_TotalTracks"
+														Set "TEMP_Disc_19_TotalTracks"
+														json_select "TRACK_NUMBER"
+														SayRest
+													endif
+												endif
+											endif
+										endif
+									endif
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		else
+			if "2"
+				## Avoid overwriting Disc 2 total tracks with Disc 20, 21, etc
+				ifnotoutput "TEMP_Disc_19_TotalTracks"
+					OutputTo "TEMP_Disc_2_TotalTracks"
+					Set "TEMP_Disc_2_TotalTracks"
+					json_select "TRACK_NUMBER"
+					SayRest
+				else
+					if "20"
+						OutputTo "TEMP_Disc_20_TotalTracks"
+						Set "TEMP_Disc_20_TotalTracks"
+						json_select "TRACK_NUMBER"
+						SayRest
+					endif
+				endif
+			else
+				if "3"
+					OutputTo "TEMP_Disc_3_TotalTracks"
+					Set "TEMP_Disc_3_TotalTracks"
+					json_select "TRACK_NUMBER"
+					SayRest
+				else
+					if "4"
+						OutputTo "TEMP_Disc_4_TotalTracks"
+						Set "TEMP_Disc_4_TotalTracks"
+						json_select "TRACK_NUMBER"
+						SayRest
+					else
+						if "5"
+							OutputTo "TEMP_Disc_5_TotalTracks"
+							Set "TEMP_Disc_5_TotalTracks"
+							json_select "TRACK_NUMBER"
+							SayRest
+						else
+							if "6"
+								OutputTo "TEMP_Disc_6_TotalTracks"
+								Set "TEMP_Disc_6_TotalTracks"
+								json_select "TRACK_NUMBER"
+								SayRest
+							else
+								if "7"
+									OutputTo "TEMP_Disc_7_TotalTracks"
+									Set "TEMP_Disc_7_TotalTracks"
+									json_select "TRACK_NUMBER"
+									SayRest
+								else
+									if "8"
+										OutputTo "TEMP_Disc_8_TotalTracks"
+										Set "TEMP_Disc_8_TotalTracks"
+										json_select "TRACK_NUMBER"
+										SayRest
+									else
+										if "9"
+											OutputTo "TEMP_Disc_9_TotalTracks"
+											Set "TEMP_Disc_9_TotalTracks"
+											json_select "TRACK_NUMBER"
+											SayRest
+										endif
+									endif
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	json_foreach_end
+endif
+
+# TRACK LOOP
+json_unselect_object
+json_select_object "SONGS"
+json_foreach "data"
+
+	# Title
+	OutputTo "TEMP_Title"
+	json_select "SNG_TITLE"
+	SayRest
+	## Don't add the '|' separator yet until featured artists are parsed and
+	## added to this field, if they exist
+
+	# Artist
+	OutputTo "TEMP_Main_Artist"
+	json_select "ART_NAME"
+	SayRest
+	## Check if there are multiple main artists
+	OutputTo "TEMP_Main_Artists"
+	json_foreach "ARTISTS"
+		json_select "ROLE_ID"
+		## Main artists have a '0' value while featured artists have a '5' one
+		if "0"
+			json_select "ART_NAME"
+			ifoutput "TEMP_Main_Artists"
+				Say ", "
+				SayRest
+				Set "TEMP_Multiple_Main_Artists" "1"
+			else
+				SayRest
+			endif
+		endif
+	json_foreach_end
+	OutputTo "TEMP_Artist"
+	ifnotoutput "TEMP_Multiple_Main_Artists"
+		SayOutput "TEMP_Main_Artist"
+	else
+		SayOutput "TEMP_Main_Artists"
+		Set "TEMP_Multiple_Main_Artists"
+	endif
+	Say "|"
+	Set "TEMP_Main_Artist"
+	Set "TEMP_Main_Artists"
+
+	# Length (seconds)
+	OutputTo "_LENGTH"
+	json_select "DURATION"
+	SayRest
+	Say "|"
+	
+	# REPLAYGAIN
+	OutputTo "REPLAYGAIN_TRACK_GAIN"
+	json_select "GAIN"
+	SayRest
+	Say "|"
+
+	# Disc number
+	OutputTo "TEMP_DiscNumber"
+	json_select "DISK_NUMBER"
+	SayRest
+	Say "/"
+	SayOutput "TOTALDISCS"
+	Say "|"
+
+	# Track number
+	OutputTo "TEMP_Track"
+	json_select "TRACK_NUMBER"
+	SayRest
+	ifnotoutput "TEMP_Multidisc"
+		Say "/"
+		SayOutput "TEMP_TotalTracks"
+	else
+		json_select "DISK_NUMBER"
+		if "1"
+			Say "/"
+			ifoutput "TEMP_Disc_9_TotalTracks"
+				if "10"
+					SayOutput "TEMP_Disc_10_TotalTracks"
+				else
+					if "11"
+						SayOutput "TEMP_Disc_11_TotalTracks"
+					else
+						if "12"
+							SayOutput "TEMP_Disc_12_TotalTracks"
+						else
+							if "13"
+								SayOutput "TEMP_Disc_13_TotalTracks"
+							else
+								if "14"
+									SayOutput "TEMP_Disc_14_TotalTracks"
+								else
+									if "15"
+										SayOutput "TEMP_Disc_15_TotalTracks"
+									else
+										if "16"
+											SayOutput "TEMP_Disc_16_TotalTracks"
+										else
+											if "17"
+												SayOutput "TEMP_Disc_17_TotalTracks"
+											else
+												if "18"
+													SayOutput "TEMP_Disc_18_TotalTracks"
+												else
+													if "19"
+														SayOutput "TEMP_Disc_19_TotalTracks"
+													else
+														SayOutput "TEMP_Disc_1_TotalTracks"
+													endif
+												endif
+											endif
+										endif
+									endif
+								endif
+							endif
+						endif
+					endif
+				endif
+			else
+				SayOutput "TEMP_Disc_1_TotalTracks"
+			endif
+		else
+			if "2"
+				ifoutput "TEMP_Disc_19_TotalTracks"
+					if "20"
+						Say "/"
+						SayOutput "TEMP_Disc_20_TotalTracks"
+						Set "TEMP_Disc_20_Reached" "1"
+					else
+						## Discs beyond the 20th one aren't considered
+						ifnotoutput "TEMP_Disc_20_Reached"
+							Say "/"
+							SayOutput "TEMP_Disc_2_TotalTracks"
+						endif
+					endif
+				else
+					Say "/"
+					SayOutput "TEMP_Disc_2_TotalTracks"
+				endif
+			else
+				## Discs beyond the 20th one aren't considered
+				ifnotoutput "TEMP_Disc_20_Reached"
+					Say "/"
+					if "3"					
+						SayOutput "TEMP_Disc_3_TotalTracks"
+					else
+						if "4"
+							SayOutput "TEMP_Disc_4_TotalTracks"
+						else
+							if "5"
+								SayOutput "TEMP_Disc_5_TotalTracks"
+							else
+								if "6"
+									SayOutput "TEMP_Disc_6_TotalTracks"
+								else
+									if "7"
+										SayOutput "TEMP_Disc_7_TotalTracks"
+									else
+										if "8"
+											SayOutput "TEMP_Disc_8_TotalTracks"
+										else
+											if "9"
+												SayOutput "TEMP_Disc_9_TotalTracks"
+											endif
+										endif
+									endif
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	endif
+	Say "|"
+
+	# Title Version
+	OutputTo "TEMP_Title"
+	json_select "VERSION"
+	ifnot ""
+		Say " "
+		SayRest
+	endif
+	## Don't add the '|' separator yet until featured artists are parsed and
+	## added to this field, if they exist
+	
+	## Added version to title instead
+	# Comment
+	# OutputTo "COMMENT"
+	# json_select "VERSION"
+	# SayRest
+	# Say "|"
+	
+	# Explicitness
+	OutputTo "ITUNESADVISORY"
+	json_select "EXPLICIT_LYRICS"
+	if "1"
+		Say "1"
+	endif
+	Say "|"
+
+	# ISRC
+	OutputTo "ISRC"
+	json_select "ISRC"
+	SayRest
+	Say "|"
+
+	## All kind of contributors
+	json_select_object "SNG_CONTRIBUTORS"
+
+	# Involved people: author, producer, co-producer, executive producer,
+	# engineer, mastering engineer, mixing engineer, balance engineer,
+	# concertmaster, director, orchestra, arranger, etc
+	OutputTo "INVOLVEDPEOPLE"
+	json_select_array "author" -1 ";author:"
+	ifnot ""
+		Say "author:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "producer" -1 ";producer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "producer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "co-producer" -1 ";co-producer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "co-producer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "executive producer" -1 ";executive producer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "executive producer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "recording producer" -1 ";recording producer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "recording producer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "misc. prod." -1 ";misc. producer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "misc. producer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "engineer" -1 ";engineer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "engineer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "mastering engineer" -1 ";mastering engineer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "mastering engineer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "recording engineer" -1 ";recording engineer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "recording engineer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "mixing engineer" -1 ";mixing engineer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "mixing engineer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "balance engineer" -1 ";balance engineer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "balance engineer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "assistant engineer" -1 ";assistant engineer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "assistant engineer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "concertmaster" -1 ";concertmaster:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "concertmaster:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "director" -1 ";director:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "director:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "musical director" -1 ";musical director:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "musical director:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "orchestra" -1 ";orchestra:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "orchestra:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "arranger" -1 ";arranger:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "arranger:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "vocal" -1 ";vocal:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "vocal:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "background vocal" -1 ";background vocal:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "background vocal:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "photographer" -1 ";photographer:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "photographer:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	json_select_array "art director" -1 ";art director:"
+	ifnot ""
+		ifoutput "Temp_People"
+			Say ";"
+		endif
+		Say "art director:"
+		SayRest
+		Set "Temp_People" "1"
+	endif
+	Say "|"
+	Set "Temp_People"
+
+	# Composer
+	OutputTo "COMPOSER"
+	json_select_array "composer" -1 ", "
+	ifnot ""
+		SayRest
+	endif
+	Say "|"
+
+	# Conductor
+	OutputTo "CONDUCTOR"
+	json_select_array "conductor" -1 ", "
+	ifnot ""
+		SayRest
+	endif
+	Say "|"
+
+	# Featured artist
+	OutputTo "TEMP_Title"
+	json_select_array "featuredartist" -1 ", "
+	ifnot ""
+		Say " (feat. "
+		SayRest
+		Say ")"
+		Set "Temp_Feat_Artist" "1"
+	endif
+	## Alternative way to provide featured artists
+	ifnotoutput "Temp_Feat_Artist"
+		json_select_array "featuring" -1 ", "
+		ifnot ""
+			Say " (feat. "
+			SayRest
+			Say ")"
+		endif
+	endif
+	Say "|"
+	Set "Temp_Feat_Artist"
+
+	# Lyricist / Writer
+	OutputTo "LYRICIST"
+	json_select_array "lyricist" -1 ", "
+	ifnot ""
+		SayRest
+	endif
+	## We'll also add songwriters as lyricists
+	json_select_array "writer" -1 ", "
+	ifnot ""
+		SayRest
+	endif
+	Say "|"
+
+	## Placeholder to indicate the tracks 'array' length
+	##
+	# Tracks
+	OutputTo "TRACKS"
+	Say "|"
+
+json_foreach_end
+
+
+## For some reason the track tags have to be output in this specific order,
+## and that's why temp tags have to be used in the loop and reset at the end:
+OutputTo "DISCNUMBER"
+SayOutput "TEMP_DiscNumber"
+
+OutputTo "ARTIST"
+SayOutput "TEMP_Artist"
+
+OutputTo "TITLE"
+SayOutput "TEMP_Title"
+
+OutputTo "TRACK"
+SayOutput "TEMP_Track"
+
+
+## Void temp tags/variables:
+Set "TEMP_Multidisc"
+Set "TOTALDISCS"
+Set "TEMP_TotalTracks"
+Set "TEMP_DiscNumber"
+Set "TEMP_Artist"
+Set "TEMP_Title"
+Set "TEMP_Track"
+
+Set "TEMP_Disc_1_TotalTracks"
+Set "TEMP_Disc_2_TotalTracks"
+Set "TEMP_Disc_3_TotalTracks"
+Set "TEMP_Disc_4_TotalTracks"
+Set "TEMP_Disc_5_TotalTracks"
+Set "TEMP_Disc_6_TotalTracks"
+Set "TEMP_Disc_7_TotalTracks"
+Set "TEMP_Disc_8_TotalTracks"
+Set "TEMP_Disc_9_TotalTracks"
+Set "TEMP_Disc_10_TotalTracks"
+Set "TEMP_Disc_11_TotalTracks"
+Set "TEMP_Disc_12_TotalTracks"
+Set "TEMP_Disc_13_TotalTracks"
+Set "TEMP_Disc_14_TotalTracks"
+Set "TEMP_Disc_15_TotalTracks"
+Set "TEMP_Disc_16_TotalTracks"
+Set "TEMP_Disc_17_TotalTracks"
+Set "TEMP_Disc_18_TotalTracks"
+Set "TEMP_Disc_19_TotalTracks"
+Set "TEMP_Disc_20_TotalTracks"
+Set "TEMP_Disc_20_Reached"

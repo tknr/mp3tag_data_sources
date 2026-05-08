@@ -1,0 +1,4 @@
+[IndexUrl]=https://music.apple.com/us/search?term=%s
+[UserAgent]=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36
+[SearchBy]=Search for||[$if2([$if2(%ALBUMARTIST%,%ARTIST%)][ %ALBUM%],[%_directory%] [%_parent_directory%])]||%s
+[Include]=Apple Music Web.inc

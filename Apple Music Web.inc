@@ -1,694 +1,1373 @@
-# iTunes API/Apple Music parser v 2.0 for MP3Tag v3
-# © 2021 All Rights Reserved
+# Apple Music parser v3.20 for MP3Tag
+# © 2021-2025 All Rights Reserved
 [Name]=Apple Music
-[BasedOn]=https://itunes.apple.com/
-[AlbumUrl]=
-[WordSeparator]=+
-[IndexFormat]=%_url%|%Artist%|%Album%|%_preview%|%Version%|%Tracks%|%Collection ID%|%Copyright%|%Store%|%Currency%|%Price%|%Year%|%Genre%
+[BasedOn]=https://music.apple.com/
+[WordSeparator]=%20
 [Encoding]=url-utf-8
+[IndexFormat]=%_url%|%_preview%|%_coverurl%|%Title%|%Artist%|%Tracks%|%Kind%|%Explicit%
+[MinAppVersionMac]=1.8.4
+[MinAppVersionWin]=3.22
+[Settings]=&Apple Music#Settings….settings
 
 [ParserScriptIndex]=...
 
-json "on"
-
-# debug "on" "C:\debug-index.txt"
-# DebugWriteInput "C:\debug-index-in.txt"
-
-json_select "resultCount"
-IfNot "0"
-	json_foreach "results"
-	json_select "collectionType"
-	If "Album"
-
-		json_select "collectionViewUrl"
-		Replace "?uo=4" ""
-		Replace "&uo=4" ""
-		SayRest
-		Say "|"
-
-		json_select "artistName"
-		SayRest
-		Say "|"
-
-		json_select "collectionName"
-		If ""
-			json_select "collectionCensoredName"
-		EndIf
-		SayRest
-		Say "|"
-
-		json_select "collectionViewUrl"
-		Replace "?uo=4" ""
-		Replace "&uo=4" ""
-		SayRest
-		Say "|"
-
-		json_select "collectionExplicitness"
-		Replace "notExplicit" ""
-		Replace "explicit" "Explicit"
-		Replace "cleaned" "Cleaned"
-		SayRest
-		Say "|"
-
-		json_select "trackCount"
-		SayNextNumber
-		Say "|"
-
-		json_select "collectionId"
-		SayNextNumber
-		Say "|"
-
-		json_select "copyright"
-		SayRest
-		Say "|"
-
-		json_select "country"
-		SayRest
-		Say "|"
-
-		json_select "currency"
-		SayRest
-		Say "|"
-
-		json_select "collectionPrice"
-		SayRest
-		Say "|"
-
-		json_select "releaseDate"
-		SayNextNumber
-		Say "|"
-
-		json_select "primaryGenreName"
-		SayRest
-		SayNewline
-
-	EndIf
-	If "Compilation"
-
-		json_select "collectionViewUrl"
-		Replace "?uo=4" ""
-		Replace "&uo=4" ""
-		SayRest
-		Say "|"
-
-		json_select "artistName"
-		SayRest
-		Say "|"
-
-		json_select "collectionName"
-		If ""
-			json_select "collectionCensoredName"
-		EndIf
-		SayRest
-		Say "|"
-
-		json_select "collectionViewUrl"
-		Replace "?uo=4" ""
-		Replace "&uo=4" ""
-		SayRest
-		Say "|"
-
-		json_select "collectionExplicitness"
-		Replace "notExplicit" "C"
-		Replace "explicit" "C Explicit"
-		Replace "cleaned" "C Cleaned"
-		SayRest
-		Say "|"
-
-		json_select "trackCount"
-		SayNextNumber
-		Say "|"
-
-		json_select "collectionId"
-		SayNextNumber
-		Say "|"
-
-		json_select "copyright"
-		SayRest
-		Say "|"
-
-		json_select "country"
-		SayRest
-		Say "|"
-
-		json_select "currency"
-		SayRest
-		Say "|"
-
-		json_select "collectionPrice"
-		SayRest
-		Say "|"
-
-		json_select "releaseDate"
-		SayNextNumber
-		Say "|"
-
-		json_select "primaryGenreName"
-		SayRest
-		SayNewline
-
-	EndIf
-	json_foreach_end
-EndIf
-
-[ParserScriptAlbum]=...
-
-FindLine "<script type=\"fastboot/shoebox\" id=\"shoebox-media-api-cache-amp-music\">"
-FindInLine "<script type=\"fastboot/shoebox\" id=\"shoebox-media-api-cache-amp-music\">"
-RegexpReplace "(?i).*?id=\"shoebox-media-api-cache-amp-music\">(\{.*\"\})<\/script>.+" "$1"
-Replace "\\\\\\\"" "\u0022"
-Replace "\\\"" "\""
-Replace "\":\"{" "\":{"
-Replace "}}]}\"" "}}]}"
-Replace "]}}}]}\"}" "]}}}]}}"
-RegexpReplace "\.catalog\.(.*?)\.albums\.(.*?)\.art" "mp3tagalbum"
-Replace ".5burl.5d.f.extend.5balbums.5d.editorialartwork.extend.offers" ""
-Replace ".2cpopularity" ""
-Replace ".2ceditorialvideo.fields.5balbums.3aalbums.5d.artistname" ""
-Replace ".2cartisturl.2cartwork" ""
-Replace ".2ccontentrating.2ceditorialartwork" ""
-Replace ".2ceditorialnotes" ""
-Replace ".2cname.2cplayparams.2creleasedate" ""
-Replace ".2curl.fields.5bartists.5d.name.2curl.fields.5brecord-labels" ""
-Replace ".5d.name.2curl.include" ""
-Replace ".5bmusic-videos.5d.artists.2ccomposers.include" ""
-Replace ".5bsongs.5d.artists.2ccomposers.include.tracks" ""
-RegexpReplace "2crecord-labels\.l\.(.*?)\.omit" "locale"
-Replace ".2cartists.locale.5bresource" ""
-Replace ".5d.autos.views.appears-on.2cmore-by-artist.2crelated-videos" ""
-Replace ".2cother-versions.2cyou-might-also-like.2cvideo-extras.2caudio-extras" ""
-Replace ".5d.autos.platform.web.views.appears-on.2cmore-by-artist.2crelated-videos" ""
-
-RegexpReplace "storefronts\.(.*?)\"" "storefronts\""
+FindLine "serialized-server-data"
+JoinUntil "</script>"
+RegexpReplace ".*<script[^>]*id=['\"]serialized-server-data['\"][^>]*>([\s\S]*)<\/script>.*" "$1"
+RegexpReplace "^\s*\[([\s\S]*)\]\s*$" "$1"
+RegexpReplace "^\s*\{[\s\S]*?\"data\"\s*:\s*\[(\{[\s\S]*\})\]\s*,[\s\S]*\"userTokenHash\"[\s\S]*\}\s*$" "$1"
 
 json "on" "current"
 
-# debug "on" "C:\debug-album.txt"
-# DebugWriteInput "C:\debug-album-in.txt"
+# debug "on" "debug-index.txt"
 
-json_select_object ".storefronts"
-	json_select_array "d" 1
-		json_select "id"
-		IfNot ""
-			Replace "br" "143503"
-			Replace "cn" "143465"
-			Replace "dk" "143458"
-			Replace "fi" "143447"
-			Replace "fr" "143442"
-			Replace "de" "143443"
-			Replace "in" "143467"
-			Replace "it" "143450"
-			Replace "jp" "143462"
-			Replace "kr" "143466"
-			Replace "no" "143457"
-			Replace "pl" "143478"
-			Replace "pt" "143453"
-			Replace "ru" "143469"
-			Replace "es" "143454"
-			Replace "se" "143456"
-			Replace "tr" "143480"
-			Replace "ae" "143481"
-			Replace "gb" "143444"
-			Replace "ua" "143492"
-			Replace "us" "143441"
-			Replace "vn" "143471"
-		EndIf
-		OutputTo "ITUNESCOUNTRYID"
+json_select_object "intent"
+	json_select "term"
+	If "https://music.apple.com/"
+		OutputTo "FallbackItem"
 		SayRest
-	json_unselect_object
+		OutputTo "FallbackTerm"
+		Say "Apple Music URL"
+		Set "FoundWebURL" "True"
+	Else
+		OutputTo "FallbackItem"
+		Say "https://music.apple.com/"
+		json_select "storefront"
+		SayRest
+		Say "/album/"
+		json_select "term"
+		SayNextNumber
+		json_select "language"
+		IfNot ""
+			Say "?l="
+			SayRest
+		EndIf
+		OutputTo "FallbackTerm"
+		json_select "term"
+		Say "Apple Music ID: "
+		SayNextNumber
+	EndIf
+	OutputTo "Output"
 json_unselect_object
 
-json_select "mp3tagalbum"
-json_select_array "d" 1
-json_select "type"
-If "albums"
-	json_select "id"
-	OutputTo "ITUNESALBUMID"
-	SayRest
-	json_select_object "attributes"
+IfNotOutput "FoundWebURL"
+	json_select_object "data"
+		json_foreach "sections"
+			json_select "id"
+			If "search-results-empty-header"
+				Set "Output"
+				SayOutput "FallbackItem"
+				Say "|"
+				SayOutput "FallbackItem"
+				Say "||"
+				SayOutput "FallbackTerm"
+				Say "||||"
+			Else
+				json_select "itemKind"
+				IfNot "topSearchLockup"
+					json_foreach "items"
+						json_select_object "contentDescriptor"
+							json_select "kind"
 
-		json_select_object "artwork"
-			json_select "url"
-			IfNot ""
-				Replace "{w}" "10000"
-				Replace "{h}" "10000"
-				Replace "{f}" "jpg"
-				OutputTo "COVERURL"
-				SayRest
+							# Primary
+							IfVar "listAlbums" "true"
+								If "album"
+									Set "FoundAlbum" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+							EndIf
+							IfVar "listSongs" "true"
+								If "song"
+									Set "FoundSong" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+							EndIf
+							IfVar "listMusicVideos" "true"
+								If "musicVideo"
+									Set "FoundMusicVideo" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+							EndIf
+							IfVar "listExtraVideos" "true"
+								If "artistUploadedVideo"
+									Set "FoundExtraVideo" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+							EndIf
+							IfVar "listPlaylists" "true"
+								If "playlist"
+									Set "FoundPlaylist" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+							EndIf
+							IfVar "listRadioStations" "true"
+								If "radioStation"
+									Set "FoundRadioStation" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+								If "appleCurator"
+									Set "FoundRadioStation" "True"
+
+									# %_url%
+									json_select "url"
+									SayRest
+									Say "|"
+
+									# %_preview%
+									json_select "url"
+									SayRest
+									Say "|"
+
+								EndIf
+							EndIf
+						json_unselect_object
+
+						# Secondary
+						IfOutput "FoundAlbum"
+
+							# %_coverurl%
+							json_select_object "artwork"
+							IfNot ""
+									json_select_object "dictionary"
+										json_select "url"
+										RegexpReplace "(.*)\/.*" "$1"
+										SayRest
+										Say "/120x120-50.jpg"
+									json_unselect_object
+								json_unselect_object
+							EndIf
+							Say "|"
+
+							# %Title%
+							json_select_many "titleLinks" "title" " / "
+							SayRest
+							Say "|"
+
+							# %Artist%
+							json_select_many "subtitleLinks" "title" ", "
+							SayRest
+							Say "|"
+
+							# %Tracks%
+							json_select "trackCount"
+							SayNextNumber
+							Say "|"
+
+							# %Kind%
+							Say "Album"
+							Say "|"
+
+							# %Explicit%
+							json_select "showExplicitBadge"
+							If "1"
+								Say "Yes"
+							EndIf
+
+							SayNewline
+							Set "FoundAlbum"
+
+						EndIf
+						IfOutput "FoundSong"
+
+							# %_coverurl%
+							json_select_object "artwork"
+							IfNot ""
+									json_select_object "dictionary"
+										json_select "url"
+										RegexpReplace "(.*)\/.*" "$1"
+										SayRest
+										Say "/120x120-50.jpg"
+									json_unselect_object
+								json_unselect_object
+							EndIf
+							Say "|"
+
+							# %Title%
+							json_select "title"
+							SayRest
+							Say "|"
+
+							# %Artist%
+							json_select_many "subtitleLinks" "title" ", "
+							SayRest
+							Say "|"
+
+							# %Tracks%
+							json_select "trackCount"
+							Say "|"
+
+							# %Kind%
+							Say "Song (Album)"
+							Say "|"
+
+							# %Explicit%
+							json_select "showExplicitBadge"
+							If "1"
+								Say "Yes"
+							EndIf
+
+							SayNewline
+							Set "FoundSong"
+
+						EndIf
+						IfOutput "FoundMusicVideo"
+
+							# %_coverurl%
+							json_select_object "artwork"
+							IfNot ""
+									json_select_object "dictionary"
+										json_select "url"
+										RegexpReplace "(.*)\/.*" "$1"
+										SayRest
+										Say "/120x120-50.jpg"
+									json_unselect_object
+								json_unselect_object
+							EndIf
+							Say "|"
+
+							# %Title%
+							json_select_many "titleLinks" "title" " / "
+							SayRest
+							Say "|"
+
+							# %Artist%
+							json_select_many "subtitleLinks" "title" ", "
+							SayRest
+							Say "|"
+
+							# %Tracks%
+							json_select "trackCount"
+							Say "|"
+
+							# %Kind%
+							Say "Music Video"
+							Say "|"
+
+							# %Explicit%
+							json_select "showExplicitBadge"
+							If "1"
+								Say "Yes"
+							EndIf
+
+							SayNewline
+							Set "FoundMusicVideo"
+
+						EndIf
+						IfOutput "FoundExtraVideo"
+
+							# %_coverurl%
+							json_select_object "artwork"
+							IfNot ""
+									json_select_object "dictionary"
+										json_select "url"
+										RegexpReplace "(.*)\/.*" "$1"
+										SayRest
+										Say "/120x120-50.jpg"
+									json_unselect_object
+								json_unselect_object
+							EndIf
+							Say "|"
+
+							# %Title%
+							json_select_many "titleLinks" "title" " / "
+							SayRest
+							Say "|"
+
+							# %Artist%
+							json_select_many "subtitleLinks" "title" ", "
+							SayRest
+							Say "|"
+
+							# %Tracks%
+							json_select "trackCount"
+							Say "|"
+
+							# %Kind%
+							Say "Video"
+							Say "|"
+
+							# %Explicit%
+							json_select "showExplicitBadge"
+							If "1"
+								Say "Yes"
+							EndIf
+
+							SayNewline
+							Set "FoundExtraVideo"
+
+						EndIf
+						IfOutput "FoundPlaylist"
+
+							# %_coverurl%
+							json_select_object "artwork"
+							IfNot ""
+									json_select_object "dictionary"
+										json_select "url"
+										RegexpReplace "(.*)\/.*" "$1"
+										SayRest
+										Say "/120x120-50.jpg"
+									json_unselect_object
+								json_unselect_object
+							EndIf
+							Say "|"
+
+							# %Title%
+							json_select_many "titleLinks" "title" " / "
+							SayRest
+							Say "|"
+
+							# %Artist%
+							json_select_many "subtitleLinks" "title" ", "
+							SayRest
+							Say "|"
+
+							# %Tracks%
+							json_select "trackCount"
+							Say "|"
+
+							# %Kind%
+							Say "Playlist"
+							Say "|"
+
+							# %Explicit%
+							json_select "showExplicitBadge"
+							If "1"
+								Say "Yes"
+							EndIf
+
+							SayNewline
+							Set "FoundPlaylist"
+
+						EndIf
+						IfOutput "FoundRadioStation"
+
+							# %_coverurl%
+							json_select_object "artwork"
+							IfNot ""
+									json_select_object "dictionary"
+										json_select "url"
+										RegexpReplace "(.*)\/.*" "$1"
+										SayRest
+										Say "/120x120-50.jpg"
+									json_unselect_object
+								json_unselect_object
+							EndIf
+							Say "|"
+
+							# %Title%
+							json_select_many "titleLinks" "title" " / "
+							SayRest
+							Say "|"
+
+							# %Artist%
+							json_select_many "subtitleLinks" "title" ", "
+							SayRest
+							Say "|"
+
+							# %Tracks%
+							json_select "trackCount"
+							Say "|"
+
+							# %Kind%
+							Say "Radio Station"
+							Say "|"
+
+							# %Explicit%
+							json_select "showExplicitBadge"
+							If "1"
+								Say "Yes"
+							EndIf
+
+							SayNewline
+							Set "FoundRadioStation"
+
+						EndIf
+					json_foreach_end
+				EndIf
 			EndIf
-		json_unselect_object
+		json_foreach_end
+	json_unselect_object
+Else
+	Set "Output"
+	SayOutput "FallbackItem"
+	Say "|"
+	SayOutput "FallbackItem"
+	Say "||"
+	SayOutput "FallbackTerm"
+	Say "||||"
+	Set "FoundWebURL"
+EndIf
 
-		json_select "isCompilation"
-		OutputTo "COMPILATION"
-		SayRest
+json "off"
 
-		json_select "artistName"
-		OutputTo "ALBUMARTIST"
-		Replace "Various Artists" ""
-		Replace "Varios Artistas" ""
-		Replace "Vários Artistas" ""
-		Replace "Vários intérpretes" ""
-		Replace "群星" ""
-		Replace "群星" ""
-		Replace "Eri Esittäjiä" ""
-		Replace "Multi-interprètes" ""
-		Replace "Verschiedene Interpreten" ""
-		Replace "Verschillende artiesten" ""
-		Replace "Artisti Vari" ""
-		Replace "ヴァリアス・アーティスト" ""
-		Replace "Diverse Artister" ""
-		Replace "Разные артисты" ""
-		Replace "Разные исполнители" ""
-		Replace "Διάφοροι καλλιτέχνες" ""
-		Replace "Blandade Artister" ""
-		Replace "אמנים שונים" ""
-		Replace "Çeşitli Sanatçılar" ""
-		Replace "مختلف الفنانين" ""
-		Replace "فنانون متنوعون" ""
-		Replace "فنانون متعددون" ""
-		Replace "Різні виконавці" ""
-		Replace "รวมศิลปิน" ""
-		Replace "Nhiều Nghệ Sĩ" ""
+[ParserScriptAlbum]=...
+
+IfNotOutput "Delimiter"
+	OutputTo "Delimiter"
+	IfVar "delimiter" "\\\\"
+		Say "\\\\"
+	EndIf
+	IfVar "delimiter" ", "
+		Say ", "
+	EndIf
+	IfVar "delimiter" ";"
+		Say ";"
+	EndIf
+	IfVar "delimiter" "/"
+		Say "/"
+	EndIf
+	IfVar "delimiter" "|"
+		Say "$verticalBar()"
+	EndIf
+	IfVar "delimiter" " "
+		Say " "
+	EndIf
+EndIf
+
+FindLine "<script id=schema:song type=\"application/ld+json\">" 1 1
+If ""
+    GotoLine 1
+    FindLine "<script id=\"schema:song\" type=\"application/ld+json\">" 1 1
+EndIf
+If ""
+    GotoLine 1
+    FindLine "<script id=schema:music-video type=\"application/ld+json\">" 1 1
+EndIf
+If ""
+    GotoLine 1
+    FindLine "<script id=\"schema:music-video\" type=\"application/ld+json\">" 1 1
+EndIf
+If ""
+    GotoLine 1
+    FindLine "<script id=schema:music-album type=\"application/ld+json\">" 1 1
+EndIf
+If ""
+    GotoLine 1
+    FindLine "<script id=\"schema:music-album\" type=\"application/ld+json\">" 1 1
+EndIf
+JoinUntil "</script>"
+RegexpReplace ".*<script[^>]*type=['\"]application\/ld\+json['\"][^>]*>([\s\S]*)<\/script>.*" "$1"
+
+json "on" "current"
+
+json_select "datePublished"
+OutputTo "YEAR"
+IfNot ""
+    SayNChars 10
+    Say "T09:00:00Z"
+EndIf
+
+OutputTo "GENRE"
+IfVar "singleGenre" "true"
+	json_select_array "genre" 1 ""
+Else
+	json_select_array "genre" -1 "\\\\"
+	Replace "\\\\Musica" ""
+	Replace "\\\\Music" ""
+	Replace "\\\\Musiikki" ""
+	Replace "\\\\Musikk" ""
+	Replace "\\\\Musik" ""
+	Replace "\\\\Musique" ""
+	Replace "\\\\Muzyka" ""
+	Replace "\\\\Müzik" ""
+	Replace "\\\\Música" ""
+	Replace "\\\\Музика" ""
+	Replace "\\\\ミュージック" ""
+	IfVar "delimiter" ", "
+		Replace "\\\\" ", "
+	EndIf
+	IfVar "delimiter" ";"
+		Replace "\\\\" ";"
+	EndIf
+	IfVar "delimiter" "/"
+		Replace "\\\\" "/"
+	EndIf
+	IfVar "delimiter" "|"
+		Replace "\\\\" "$verticalBar()"
+	EndIf
+	IfVar "delimiter" " "
+		Replace "\\\\" " "
+	EndIf
+EndIf
+SayRest
+
+json_foreach "tracks"
+	OutputTo "TRACKS"
+	json_select "name"
+	SayRest
+	Say "|"
+	OutputTo "TITLE"
+	json_select "name"
+	IfNotVar "originalTitles" "true"
+		RegexpReplace "\(.*\)" ""
+		RegexpReplace "\[.*\]" ""
 		If ""
-			Set "COMPILATION"
-			OutputTo "COMPILATION"
-			Say "1"
-			OutputTo "ALBUMARTIST"
-			Say ""
+			Set "Skip_Comment" "True"
+			json_select "name"
+			SayRegexp "(?<=\()[^)]*(?=\))"
 		Else
 			SayRest
 		EndIf
-
-		json_select_array "genreNames" -1 ", "
-		OutputTo "ALBUMGENRES"
+	Else
 		SayRest
+	EndIf
+	Say "|"
 
-		json_select "trackCount"
-		OutputTo "TOTALTRACKS"
-		SayNextNumber
-
-		json_select "releaseDate"
-		OutputTo "YEAR"
-		SayRest
-
-		json_select "name"
-		OutputTo "ALBUM"
-		SayRest
-
-		json_select "recordLabel"
-		OutputTo "LABEL"
-		SayRest
-
-		json_select "upc"
-		OutputTo "UPC"
-		SayRest
-
-		json_select "copyright"
-		OutputTo "COPYRIGHT"
-		SayRest
-
-		json_select_object "editorialNotes"
-			IfNot ""
-			json_select "short"
-			OutputTo "COMMENT"
-			SayRest
-			json_select "standard"
-			OutputTo "DESCRIPTION"
-			SayRest
-			json_unselect_object
+	IfNotVar "originalTitles" "true"
+		OutputTo "COMMENT"
+		IfNotOutput "Skip_Comment"
+			json_select "name"
+			SayRegexp "(?<=\()[^)]*(?=\))"
+			IfOutput "COMMENT"
+				SayNewline
 			EndIf
-
-		json_select "contentRating"
-		IfNot ""
-			Replace "notExplicit" "0"
-			Replace "explicit" "1"
-			Replace "cleaned" "2"
-			OutputTo "ALBUMADVISORY"
-			SayRest
+			SayRegexp "(?<=\[)[^)]*(?=\])"
+			Set "Skip_Comment"
 		EndIf
+		Say "|"
+	EndIf
 
+	IfVar "addSortTitles" "true"
+		OutputTo "TITLESORT"
+		json_select "name"
+		SayRest
+		Say "|"
+	EndIf
+
+	json_select_object "audio"
+    	OutputTo "TRACKYEAR"
+    	json_select "uploadDate"
+    	SayRest
+    	Say "|"
 	json_unselect_object
 
-	json_select_object "relationships"
-		json_select_object "tracks"
-			json_foreach "data"
-				json_select "type"
-				If "songs"
+json_foreach_end
 
-					json_select "id"
-					OutputTo "ITUNESCATALOGID"
-					SayNextNumber
-					Say "|"
+json "off"
 
-					json_select_object "attributes"
+FindLine "serialized-server-data" 1 1
+JoinUntil "</script>"
+RegexpReplace ".*<script[^>]*id=['\"]serialized-server-data['\"][^>]*>([\s\S]*)<\/script>.*" "$1"
+RegexpReplace "^\s*\[([\s\S]*)\]\s*$" "$1"
+RegexpReplace "^\s*\{[\s\S]*?\"data\"\s*:\s*\[(\{[\s\S]*\})\]\s*,[\s\S]*\"userTokenHash\"[\s\S]*\}\s*$" "$1"
 
-						json_select "artistName"
-						OutputTo "ARTIST"
-						SayRest
-						Say "|"
+json "on" "current"
 
-						json_select "discNumber"
-						OutputTo "DISCNUMBER"
-						SayNextNumber
-						Say "|"
+# debug "on" "debug-album.txt"
 
-						json_select "discNumber"
-						Set "TOTALDISCS"
-						OutputTo "TOTALDISCS"
-						SayNextNumber
-						Say "|"
+json_select_object "data"
+	IfNot ""
+	json_foreach "sections"
 
-						json_select_array "genreNames" 1
-						OutputTo "GENRE"
-						SayRest
-						Say "|"
+		json_select "itemKind"
+		If "containerDetailHeaderLockup"
+			Set "ValidSection" "True"
+		EndIf
+		If "trackLockup"
+			Set "ValidSection" "True"
+		EndIf
+		If "containerDetailTracklistFooterLockup"
+			Set "ValidSection" "True"
+		EndIf
+		If "tvMovieDetailHeaderLockup"
+			Set "ValidSection" "True"
+		EndIf
 
-						json_select_array "genreNames" -1 ", "
-						OutputTo "GENRES"
-						SayRest
-						Say "|"
+		IfOutput "ValidSection"
+		    Set "TEMP_DISCNAME"
+		    json_select_object "header"
+			IfNot ""
+			    json_select "kind"
+				    If "disc"
+              		    json_select_object "item"
+                            OutputTo "TEMP_DISCNAME"
+                            json_select "title"
+                            SayRest
+              		    json_unselect_object
+                    EndIf
+    		    json_unselect_object
+			EndIf
+		    Set "TEMP_LOCAL_ITEMCOUNT"
+			json_foreach "items"
+    			OutputTo "TEMP_LOCAL_ITEMCOUNT"
+    			SayRest
+				# Primary
+				json_select_object "contentDescriptor"
+					json_select "kind"
 
-						json_select "durationInMillis"
-						OutputTo "_LENGTH"
-						SayNextNumber
-						Say "|"
+					If "album"
+						Set "SectionAlbum" "True"
 
-						json_select "releaseDate"
-						OutputTo "TRACKYEAR"
-						SayRest
-						Say "|"
+						IfNotVar "skipiTunesTags" "true"
+							IfNotOutput "ITUNESALBUMID"
+								OutputTo "ITUNESALBUMID"
+								json_select_object "identifiers"
+									json_select "storeAdamID"
+									SayNextNumber
+								json_unselect_object
+							EndIf
+						EndIf
 
-						json_select "name"
-						OutputTo "TRACKS"
-						SayRest
-						Say "|"
+					EndIf
 
-						json_select "isrc"
-						OutputTo "ISRC"
-						SayRest
-						Say "|"
+					If "song"
+						Set "SectionSong" "True"
 
-						json_select "trackNumber"
-						OutputTo "TRACK"
-						SayNextNumber
-						Say "|"
+						IfNotVar "skipiTunesTags" "true"
+							OutputTo "ITUNESMEDIATYPE"
+							Say "Normal"
+							Say "|"
+						EndIf
 
-						json_select "audioLocale"
-						OutputTo "LANGUAGE"
-						SayRest
-						Say "|"
+						IfNotVar "skipiTunesTags" "true"
+							OutputTo "ITUNESCATALOGID"
+							json_select_object "identifiers"
+								json_select "storeAdamID"
+								SayNextNumber
+							json_unselect_object
+							Say "|"
+						EndIf
 
-						json_select "workName"
+					EndIf
+
+					If "musicVideo"
+						Set "SectionSong" "True"
+
+						IfNotVar "skipiTunesTags" "true"
+							OutputTo "ITUNESMEDIATYPE"
+							Say "Music Video"
+							Say "|"
+						EndIf
+
+						IfNotVar "skipiTunesTags" "true"
+							OutputTo "ITUNESCATALOGID"
+							json_select_object "identifiers"
+								json_select "storeAdamID"
+								SayNextNumber
+							json_unselect_object
+							Say "|"
+						EndIf
+
+					EndIf
+
+				json_unselect_object
+
+				# Secondary
+				json_foreach "subtitleLinks"
+					IfNot "0"
+
+						IfOutput "SectionAlbum"
+
+							IfNotVar "naturalTitles" "true"
+								OutputTo "ALBUMARTIST"
+								IfOutput "ALBUMARTIST"
+									SayOutput "Delimiter"
+								EndIf
+								json_select "title"
+
+								Replace "Various Artists" ""
+								Replace "Varios Artistas" ""
+								Replace "Vários Artistas" ""
+								Replace "Vários intérpretes" ""
+								Replace "群星" ""
+								Replace "群星" ""
+								Replace "Eri Esittäjiä" ""
+								Replace "Multi-interprètes" ""
+								Replace "Verschiedene Interpreten" ""
+								Replace "Verschillende artiesten" ""
+								Replace "Artisti Vari" ""
+								Replace "ヴァリアス・アーティスト" ""
+								Replace "Diverse Artister" ""
+								Replace "Разные артисты" ""
+								Replace "Разные исполнители" ""
+								Replace "Διάφοροι καλλιτέχνες" ""
+								Replace "Blandade Artister" ""
+								Replace "אמנים שונים" ""
+								Replace "Çeşitli Sanatçılar" ""
+								Replace "مختلف الفنانين" ""
+								Replace "فنانون متنوعون" ""
+								Replace "فنانون متعددون" ""
+								Replace "Різні виконавці" ""
+								Replace "รวมศิลปิน" ""
+								Replace "Nhiều Nghệ Sĩ" ""
+								IfNot ""
+									json_select "title"
+									SayRest
+								EndIf
+
+								IfVar "addSortTitles" "true"
+									Set "ALBUMARTISTSORT"
+									OutputTo "ALBUMARTISTSORT"
+									SayOutput "ALBUMARTIST"
+								EndIf
+
+							EndIf
+
+						EndIf
+
+						IfOutput "SectionSong"
+
+							IfNotVar "naturalTitles" "true"
+
+								OutputTo "ARTIST"
+								IfOutput "TEMP_ARTIST"
+									SayOutput "Delimiter"
+								EndIf
+								json_select "title"
+								SayRest
+								Set "TEMP_ARTIST" "True"
+
+							EndIf
+
+						EndIf
+
+						json_select_object "segue"
 						IfNot ""
-							OutputTo "SHOWMOVEMENT"
-							Say "1"
-							Say "|"
-							OutputTo "WORK"
-							SayRest
-							Say "|"
-							json_select "movementName"
-							IfNot ""
-								OutputTo "MOVEMENTNAME"
-								SayRest
-								Say "|"						
-								json_select "movementNumber"
-								OutputTo "MOVEMENT"
-								SayNextNumber
-								Say "|"
-								json_select "movementCount"
-								OutputTo "MOVEMENTTOTAL"
-								SayNextNumber
-								Say "|"
-							Else
-								OutputTo "MOVEMENTNAME"
-								json_select "name"
-								FindInLine ": " 1 1
-								SayRest
-								Say "|"
-								OutputTo "MOVEMENT"
-								Say "|"
-								OutputTo "MOVEMENTTOTAL"
+							json_select_object "destination"
+								json_select_object "contentDescriptor"
+									json_select "kind"
+
+									If "artist"
+										json_select_object "identifiers"
+
+											IfOutput "SectionAlbum"
+												OutputTo "TEMP_ALBUMARTISTID"
+												IfOutput "TEMP_ALBUMARTISTID"
+													SayOutput "Delimiter"
+												EndIf
+												json_select "storeAdamID"
+												SayRest
+											EndIf
+
+											IfOutput "SectionSong"
+												IfNotVar "skipiTunesTags" "true"
+													OutputTo "ITUNESARTISTID"
+													IfOutput "TEMP_ITUNESARTISTID"
+														SayOutput "Delimiter"
+													EndIf
+													json_select "storeAdamID"
+													SayRest
+													Set "TEMP_ITUNESARTISTID" "True"
+												EndIf
+											EndIf
+
+										json_unselect_object
+									EndIf
+
+								json_unselect_object
+							json_unselect_object
+						json_unselect_object
+						Else
+
+							IfOutput "SectionAlbum"
+								OutputTo "COMPILATION"
+								Say "1"
+							EndIf
+
+						EndIf
+
+					Else
+
+						IfOutput "SectionSong"
+
+							IfNotVar "naturalTitles" "true"
+								OutputTo "ARTIST"
+								SayOutput "ALBUMARTIST"
 								Say "|"
 							EndIf
-						Else
-							OutputTo "SHOWMOVEMENT"
-							Say "0"
-							Say "|"
-							OutputTo "WORK"
-							Say "|"
-							OutputTo "MOVEMENTNAME"
-							Say "|"
-							OutputTo "MOVEMENT"
-							Say "|"
-							OutputTo "MOVEMENTTOTAL"
-							Say "|"
+							IfNotVar "skipiTunesTags" "true"
+								OutputTo "ITUNESARTISTID"
+								SayOutput "TEMP_ALBUMARTISTID"
+								Say "|"
+							EndIf
 						EndIf
 
-						json_select "composerName"
-						OutputTo "COMPOSER"
-						SayRest
-						Say "|"
+					EndIf
+				json_foreach_end
 
-						json_select "attribution"
-						OutputTo "ATTRIBUTION"
-						SayRest
+				# Cleanup
+				IfOutput "TEMP_ARTIST"
+					Set "TEMP_ARTIST"
+					OutputTo "ARTIST"
+					Say "|"
+				EndIf
+				IfOutput "TEMP_ITUNESARTISTID"
+					Set "TEMP_ITUNESARTISTID"
+					IfNotVar "skipiTunesTags" "true"
+						OutputTo "ITUNESARTISTID"
 						Say "|"
+					EndIf
+				EndIF
 
-						json_select "contentRating"
-						OutputTo "ITUNESADVISORY"
-						IfNot ""
-							Replace "notExplicit" "0"
-							Replace "explicit" "1"
-							Replace "cleaned" "2"
+				json_select_object "modalPresentationDescriptor"
+				IfNot ""
+					OutputTo "DESCRIPTION"
+					json_select "paragraphText"
+					SayRest
+					IfVar "naturalTitles" "true"
+						IfNotOutput "ALBUMARTIST"
+							OutputTo "ALBUMARTIST"
+							json_select "headerSubtitle"
+							Replace "Various Artists" ""
+							Replace "Varios Artistas" ""
+							Replace "Vários Artistas" ""
+							Replace "Vários intérpretes" ""
+							Replace "群星" ""
+							Replace "群星" ""
+							Replace "Eri Esittäjiä" ""
+							Replace "Multi-interprètes" ""
+							Replace "Verschiedene Interpreten" ""
+							Replace "Verschillende artiesten" ""
+							Replace "Artisti Vari" ""
+							Replace "ヴァリアス・アーティスト" ""
+							Replace "Diverse Artister" ""
+							Replace "Разные артисты" ""
+							Replace "Разные исполнители" ""
+							Replace "Διάφοροι καλλιτέχνες" ""
+							Replace "Blandade Artister" ""
+							Replace "אמנים שונים" ""
+							Replace "Çeşitli Sanatçılar" ""
+							Replace "مختلف الفنانين" ""
+							Replace "فنانون متنوعون" ""
+							Replace "فنانون متعددون" ""
+							Replace "Різні виконавці" ""
+							Replace "รวมศิลปิน" ""
+							Replace "Nhiều Nghệ Sĩ" ""
+							RegexpReplace "\s·\s\d*" ""
+							IfNot ""
+								json_select "headerSubtitle"
+								RegexpReplace "\s·\s.*$" ""
+								SayRest
+							EndIf
+						EndIf
+						IfVar "addSortTitles" "true"
+							Set "ALBUMARTISTSORT"
+							OutputTo "ALBUMARTISTSORT"
+							SayOutput "ALBUMARTIST"
+						EndIf
+					EndIf
+					json_unselect_object
+				EndIf
+
+				OutputTo "COVERURL"
+				json_select_object "artwork"
+				IfNot ""
+						json_select_object "dictionary"
+							json_select "url"
+							IfVar "coverartSize" "Original quality"
+								Replace "://is" "://a"
+								Replace "-ssl.mzstatic.com/image/thumb/" ".mzstatic.com/us/r1000/0/"
+							EndIf
+							RegexpReplace "(.*)\/.*" "$1"
 							SayRest
-						Else
-							Say "0"
+							# Width x Height - JPEG Quality
+							IfVar "coverartSize" "600 pixels - 50 %"
+								Say "/600x600-50.jpg"
+							EndIf
+							IfVar "coverartSize" "600 pixels - 90 %"
+								Say "/600x600-90.jpg"
+							EndIf
+							IfVar "coverartSize" "1200 pixels - 50 %"
+								Say "/1200x1200-50.jpg"
+							EndIf
+							IfVar "coverartSize" "1200 pixels - 90 %"
+								Say "/1200x1200-90.jpg"
+							EndIf
+							IfVar "coverartSize" "2400 pixels - 50 %"
+								Say "/2400x2400-50.jpg"
+							EndIf
+							IfVar "coverartSize" "2400 pixels - 90 %"
+								Say "/2400x2400-90.jpg"
+							EndIf
+							IfVar "coverartSize" "3600 pixels - 50 %"
+								Say "/3600x3600-50.jpg"
+							EndIf
+							IfVar "coverartSize" "3600 pixels - 90 %"
+								Say "/3600x3600-90.jpg"
+							EndIf
+						json_unselect_object
+					json_unselect_object
+				EndIf
+
+
+				# Third
+				IfOutput "SectionAlbum"
+
+					OutputTo "ALBUM"
+					json_select "title"
+					IfNotVar "originalTitles" "true"
+						Replace " - Single" ""
+						Replace " - EP" ""
+						RegexpReplace "\(.*\)" ""
+						RegexpReplace "\[.*\]" ""
+					EndIf
+					If ""
+						json_select "title"
+					EndIf
+					SayRest
+
+
+					IfNotVar "originalTitles" "true"
+						OutputTo "CONTENTGROUP"
+						json_select "title"
+						SayRegexp "(?<=\()[^)]*(?=\))"
+						IfOutput "CONTENTGROUP"
+							SayNewline
 						EndIf
-						Say "|"
+						SayRegexp "(?<=\[)[^)]*(?=\])"
+					EndIf
 
-					json_unselect_object
-					json_select_object "relationships"
+					IfVar "addSortTitles" "true"
+						OutputTo "ALBUMSORT"
+						json_select "title"
+						SayRest
+					EndIf
 
-						json_select_object "composers"
-							json_foreach "data"
-								IfNot "0"
-									json_foreach_end
-									json_select_object "relationships"	# This must clearly be a bug in mp3tag
-									json_select_object "composers"
-									json_select_array "data" 1
-										json_select "id"
-										OutputTo "ITUNESCOMPOSERID"
-										SayRest
-										json_select_object "attributes"
-											json_select "name"
-											OutputTo "ITUNESCOMPOSERIDNAME"
-											SayRest
+					OutputTo "TOTALTRACKS"
+					json_select "trackCount"
+					SayNextNumber
+
+					OutputTo "COPYRIGHT"
+					json_select "description"
+					IfNot ""
+						SayRegexp "[℗©].*"
+						If ""
+							json_select "description"
+							SayRegexp ".*$"
+						EndIf
+					EndIf
+
+					json_select_object "linkSection"
+					IfNot ""
+						json_select "title"
+						IfNot ""
+							json_select_object "link"
+								json_select "title"
+								OutputTo "TEMP_LINKSECTION"
+								SayRest
+								json_select_object "segue"
+									json_select_object "destination"
+										json_select_object "intent"
+											json_select_object "contentDescriptor"
+												json_select "kind"
+												If "recordLabel"
+													json_select_object "identifiers"
+														IfNotVar "skipiTunesTags" "true"
+															OutputTo "ITUNESPUBLISHERID"
+															json_select "storeAdamID"
+															SayNextNumber
+														EndIf
+														OutputTo "PUBLISHER"
+														SayOutput "TEMP_LINKSECTION"
+													json_unselect_object
+												EndIf
+											json_unselect_object
 										json_unselect_object
 									json_unselect_object
-									json_select_many "data" "id" ", "
-										OutputTo "COMPOSERIDS"
-										SayRest
-								Else
-									json_foreach_end
-								EndIf
-							OutputTo "ITUNESCOMPOSERID"
-							Say "|"
-							OutputTo "ITUNESCOMPOSERIDNAME"
-							Say "|"
-							OutputTo "COMPOSERIDS"
-							Say "|"
+								json_unselect_object
+								Set "TEMP_LINKSECTION"
+							json_unselect_object
+						EndIf
 						json_unselect_object
-
-						json_select_object "artists"
-							json_foreach "data"
-								IfNot "0"
-									json_foreach_end
-									json_select_object "relationships"	# This must clearly be a bug in mp3tag
-									json_select_object "artists"
-									json_select_array "data" 1
-										json_select "id"
-										OutputTo "ITUNESARTISTID"
-										SayRest
-										json_select_object "attributes"
-											json_select "name"
-											OutputTo "ITUNESARTISTIDNAME"
-											SayRest
-										json_unselect_object
-									json_unselect_object
-									json_select_many "data" "id" ", "
-										OutputTo "ARTISTIDS"
-										SayRest
-								Else
-									json_foreach_end
-								EndIf
-							OutputTo "ITUNESARTISTID"
-							Say "|"
-							OutputTo "ITUNESARTISTIDNAME"
-							Say "|"
-							OutputTo "ARTISTIDS"
-							Say "|"
-						json_unselect_object
-
-					json_unselect_object
-
-					OutputTo "WWW"
-					Say "|"
-
-					OutputTo "VIDEO4K"
-					Say "|"
-
-					OutputTo "VIDEOHDR"
-					Say "|"
-
-					OutputTo "ITUNESMEDIATYPE"
-					Say "Normal|"
+					EndIf
 
 				EndIf
 
-				If "music-videos"
+				IfOutput "SectionSong"
 
-					json_select "id"
-					OutputTo "ITUNESCATALOGID"
+					OutputTo "TRACK"
+					json_select "trackNumber"
 					SayNextNumber
 					Say "|"
 
-					json_select_object "attributes"
-
-						json_select "artistName"
-						OutputTo "ARTIST"
-						SayRest
-						Say "|"
-
-						json_select_array "genreNames" 1
-						OutputTo "GENRE"
-						SayRest
-						Say "|"
-
-						json_select_array "genreNames" -1 ", "
-						OutputTo "GENRES"
-						SayRest
-						Say "|"
-
-						json_select "durationInMillis"
-						OutputTo "_LENGTH"
-						SayNextNumber
-						Say "|"
-
-						json_select "releaseDate"
-						OutputTo "TRACKYEAR"
-						SayRest
-						Say "|"
-
-						json_select "name"
-						OutputTo "TRACKS"
-						SayRest
-						Say "|"
-
-						json_select "isrc"
-						OutputTo "ISRC"
-						SayRest
-						Say "|"
-
-						json_select "trackNumber"
-						OutputTo "TRACK"
-						SayNextNumber
-						Say "|"
-
-						json_select "has4K"
-						OutputTo "VIDEO4K"
-						SayRest
-						Say "|"
-
-						json_select "hasHDR"
-						OutputTo "VIDEOHDR"
-						SayRest
-						Say "|"
-
-						json_select "url"
-						OutputTo "WWW"
-						SayRest
-						Say "|"
-
-						OutputTo "ITUNESMEDIATYPE"
-						Say "Music Video|"
-
-					json_unselect_object
-
-					json_select_object "relationships"
-
-						json_select_object "artists"
-							json_foreach "data"
-								IfNot "0"
-									json_foreach_end
-									json_select_object "relationships"	# This must clearly be a bug in mp3tag
-									json_select_object "artists"
-									json_select_array "data" 1
-										json_select "id"
-										OutputTo "ITUNESARTISTID"
-										SayRest
-										json_select_object "attributes"
-											json_select "name"
-											OutputTo "ITUNESARTISTIDNAME"
-											SayRest
-										json_unselect_object
-									json_unselect_object
-									json_select_many "data" "id" ", "
-										OutputTo "ARTISTIDS"
-										SayRest
-								Else
-									json_foreach_end
-								EndIf
-							OutputTo "ITUNESARTISTID"
-							Say "|"
-							OutputTo "ITUNESARTISTIDNAME"
-							Say "|"
-							OutputTo "ARTISTIDS"
-							Say "|"
-						json_unselect_object
-
-					json_unselect_object
-
-					OutputTo "ATTRIBUTION"
+					OutputTo "_LENGTH"
+					json_select "duration"
+					SayNextNumber
 					Say "|"
 
 					OutputTo "COMPOSER"
-					Say "|"
-
-					OutputTo "COMPOSERIDS"
+					json_select "composer"
+					SayRest
 					Say "|"
 
 					OutputTo "DISCNUMBER"
+					json_select "discNumber"
+					SayNextNumber
 					Say "|"
 
-					OutputTo "ITUNESADVISORY"
+					OutputTo "DISCNAME"
+					SayOutput "TEMP_DISCNAME"
 					Say "|"
 
-					OutputTo "ITUNESCOMPOSERID"
-					Say "|"
+					IfVar "naturalTitles" "true"
+						OutputTo "ARTIST"
+						json_select "artistName"
+						SayRest
+						Say "|"
+					EndIf
 
-					OutputTo "ITUNESCOMPOSERIDNAME"
-					Say "|"
-
-					OutputTo "LANGUAGE"
-					Say "|"
-
-					OutputTo "MOVEMENT"
-					Say "|"
-
-					OutputTo "MOVEMENTNAME"
-					Say "|"
-
-					OutputTo "MOVEMENTTOTAL"
-					Say "|"
+					Set "TOTALDISCS"
+					OutputTo "TOTALDISCS"
+					json_select "discNumber"
+					SayNextNumber
 
 					OutputTo "SHOWMOVEMENT"
-					Say "|"
+    				json_select "workName"
+    				IfNot ""
+    					Say "1"
+                        Say "|"
+        				OutputTo "WORK"
+        				json_select "workName"
+        				SayRest
+        				Say "|"
+        				OutputTo "MOVEMENTNAME"
+        				json_select "title"
+        				SayRest
+        				Say "|"
+        				OutputTo "MOVEMENT"
+                        json_foreach_counter
+        				SayRest
+        				Say "|"
+        				OutputTo "MOVEMENTTOTAL"
+                        SayOutput "TEMP_LOCAL_ITEMCOUNT"
+        				Say "|"
+                    Else
+                        Say "|"
+        				OutputTo "WORK"
+        				Say "|"
+        				OutputTo "MOVEMENTNAME"
+        				Say "|"
+        				OutputTo "MOVEMENT"
+        				Say "|"
+        				OutputTo "MOVEMENTTOTAL"
+        				Say "|"
+    				EndIf
 
-					OutputTo "WORK"
-					Say "|"
+    				IfNotVar "skipiTunesTags" "true"
+    					OutputTo "ITUNESADVISORY"
+    					json_select "showExplicitBadge"
+    					IfNot ""
+    						Replace "false" "0"
+    						Replace "true" "1"
+    						Replace "cleaned" "2"
+    						Replace "clean" "2"
+    						SayRest
+    					Else
+    						Say "0"
+    					EndIf
+    					Say "|"
+    				EndIf
+
 
 				EndIf
+
+				Set "SectionAlbum"
+				Set "SectionSong"
+
 			json_foreach_end
+		EndIf
+		Set "ValidSection"
+	json_foreach_end
+	Else
+		Set "NoDataFound" "True"
+	EndIf
+json_unselect_object
+
+json_select_object "data"
+IfNot ""
+	json_select_object "seoData"
+
+		OutputTo "YEAR"
+		json_select "musicReleaseDate"
+		IfNot ""
+		    SayNChars 10
+		    Say "T09:00:00Z"
+		EndIf
+
+		json_foreach "ogSongs"
+			json_select_object "attributes"
+
+				OutputTo "ISRC"
+				json_select "isrc"
+				SayRest
+				Say "|"
+
+				OutputTo "LANGUAGE"
+				json_select "audioLocale"
+				SayRest
+				Say "|"
+
+				IfNotVar "skipiTunesTags" "true"
+					OutputTo "ITUNESADVISORY"
+					json_select "contentRating"
+					IfNot ""
+						Replace "notExplicit" "0"
+						Replace "explicit" "1"
+						Replace "cleaned" "2"
+						Replace "clean" "2"
+						SayRest
+					Else
+						Say "0"
+					EndIf
+					Say "|"
+				EndIf
+
+			json_unselect_object
+
+			IfNotVar "skipiTunesTags" "true"
+				OutputTo "ITUNESCOMPOSERID"
+				json_select_object "relationships"
+					json_select_object "composers"
+						json_select_many "data" "id" "\\\\"
+						IfVar "delimiter" ", "
+							Replace "\\\\" ", "
+						EndIf
+						IfVar "delimiter" ";"
+							Replace "\\\\" ";"
+						EndIf
+						IfVar "delimiter" "/"
+							Replace "\\\\" "/"
+						EndIf
+						IfVar "delimiter" "|"
+							Replace "\\\\" "$verticalBar()"
+						EndIf
+						IfVar "delimiter" " "
+							Replace "\\\\" " "
+						EndIf
+						SayRest
+					json_unselect_object
+				json_unselect_object
+				Say "|"
+			EndIf
+
+			IfNotVar "skipiTunesTags" "true"
+				OutputTo "ITUNESFORMERIDS"
+				json_select_object "meta"
+				IfNot ""
+					json_select_array "formerIds" -1 "\\\\"
+						IfVar "delimiter" ", "
+							Replace "\\\\" ", "
+						EndIf
+						IfVar "delimiter" ";"
+							Replace "\\\\" ";"
+						EndIf
+						IfVar "delimiter" "/"
+							Replace "\\\\" "/"
+						EndIf
+						IfVar "delimiter" "|"
+							Replace "\\\\" "$verticalBar()"
+						EndIf
+						IfVar "delimiter" " "
+							Replace "\\\\" " "
+						EndIf
+						SayRest
+					json_unselect_object
+				EndIf
+				Say "|"
+			EndIf
+
+		json_foreach_end
+
+	json_unselect_object
+	EndIf
+json_unselect_object
+
+json_select_object "intent"
+	IfNot ""
+	json_select_object "contentDescriptor"
+		json_select_object "locale"
+			json_select "storefront"
+			Replace "ae" "143481"	# ar
+			Replace "ag" "143540"
+			Replace "ai" "143538"
+			Replace "am" "143524"
+			Replace "ar" "143505"	# es
+			Replace "at" "143445" # de
+			Replace "au" "143460"
+			Replace "az" "143568"
+			Replace "be" "143446" # nl fr
+			Replace "bg" "143526"
+			Replace "bh" "143559"
+			Replace "bm" "143542"
+			Replace "bn" "143560"
+			Replace "bo" "143556" # es
+			Replace "br" "143503"	# pt
+			Replace "bs" "143539"
+			Replace "bw" "143525"
+			Replace "by" "143565"
+			Replace "bz" "143555" # es
+			Replace "ca" "143455" # fr
+			Replace "ch" "143459" # de fr it
+			Replace "cl" "143483" # es
+			Replace "cn" "143465" # zh
+			Replace "co" "143501" # es
+			Replace "cr" "143495" # es
+			Replace "cv" "143580"
+			Replace "cy" "143557" # tr el
+			Replace "cz" "143489" # cs
+			Replace "de" "143443" # de
+			Replace "dk" "143458" # da
+			Replace "dm" "143545"
+			Replace "do" "143508" # es
+			Replace "ec" "143509" # es
+			Replace "ee" "143518"
+			Replace "eg" "143516" # ar
+			Replace "es" "143454" # ca es
+			Replace "fi" "143447" # fi
+			Replace "fj" "143583"
+			Replace "fm" "143591"
+			Replace "fr" "143442" # fr
+			Replace "gb" "143444"
+			Replace "gd" "143546"
+			Replace "gh" "143573"
+			Replace "gm" "143584"
+			Replace "gr" "143448" # el
+			Replace "gt" "143504" # es
+			Replace "gw" "143585" # fr
+			Replace "hk" "143463" # zh yue
+			Replace "hn" "143510" # es
+			Replace "hu" "143482" # hu
+			Replace "id" "143476" # id
+			Replace "ie" "143449"
+			Replace "il" "143491" # iw
+			Replace "in" "143467" # hi
+			Replace "it" "143450" # it
+			Replace "jo" "143528" # ar
+			Replace "jp" "143462" # ja
+			Replace "kh" "143579" # fr
+			Replace "kn" "143548"
+			Replace "kr" "143466" # ko
+			Replace "ky" "143544"
+			Replace "la" "143587" # la
+			Replace "lb" "143497" # ar
+			Replace "lk" "143486"
+			Replace "lt" "143520"
+			Replace "lu" "143451" # de fr
+			Replace "lv" "143519"
+			Replace "md" "143523"
+			Replace "mn" "143592"
+			Replace "mo" "143515" # yue zh
+			Replace "mt" "143521"
+			Replace "mu" "143533" # fr
+			Replace "mx" "143468" # es
+			Replace "my" "143473" # ms
+			Replace "mz" "143593"
+			Replace "na" "143594"
+			Replace "ne" "143534" # fr
+			Replace "ni" "143512" # es
+			Replace "nl" "143452" # nl
+			Replace "no" "143457" # nb
+			Replace "nz" "143461"
+			Replace "om" "143562" # ar
+			Replace "pa" "143485"
+			Replace "pe" "143507" # es
+			Replace "ph" "143474"
+			Replace "pl" "143478" # pl
+			Replace "pt" "143453" # pt
+			Replace "py" "143513" # es
+			Replace "qa" "143498" # ar
+			Replace "ru" "143469" # uk ru
+			Replace "sa" "143479" # ar
+			Replace "se" "143456" # sv
+			Replace "sg" "143464" # zh
+			Replace "si" "143499"
+			Replace "sk" "143496" # sk
+			Replace "sv" "143506" # es
+			Replace "sz" "143602"
+			Replace "th" "143475" # th
+			Replace "tj" "143603"
+			Replace "tm" "143604"
+			Replace "tr" "143480" # tr
+			Replace "tt" "143551" # fr
+			Replace "tw" "143470" # zh
+			Replace "ua" "143492" # uk ru
+			Replace "ug" "143537"
+			Replace "us" "143441" # es
+			Replace "ve" "143502" # es
+			Replace "vg" "143543"
+			Replace "vn" "143471" # vi
+			Replace "za" "143472"
+			Replace "zw" "143605"
+			IfNotVar "skipiTunesTags" "true"
+				OutputTo "ITUNESCOUNTRYID"
+				SayNextNumber
+				json_select "language"
+				OutputTo "ITUNESLANGUAGEID"
+				SayRest
+			EndIf
 		json_unselect_object
 	json_unselect_object
+	EndIf
+json_unselect_object
+
+# Cleanup
+Set "TEMP_ALBUMARTISTID"
+Set "Delimiter"
+Set "TEMP_LOCAL_ITEMCOUNT"
+Set "TEMP_DISCNAME"
+
+IfOutput "NoDataFound"
+	Set "Output"
 EndIf
+
+json "off"

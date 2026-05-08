@@ -1,0 +1,72 @@
+{
+  "key": "bandcamp",
+  "title": "Bandcamp Settings",
+  "settings": [
+    {
+      "type": "string",
+      "key": "yearFormat",
+      "title": "YEAR Format",
+      "description": "Format used for the YEAR field",
+      "choices": [
+        "YYYY",
+        "YYYY-MM-DD"
+      ],
+      "default": "YYYY"
+    },
+    {
+      "type": "bool",
+      "key": "maxCoverQuality",
+      "title": "Highest quality for cover art",
+      "default": false
+    },
+    {
+      "type": "separator",
+      "key": "searchResults",
+      "title": "Search results to include"
+    },
+    {
+      "type": "bool",
+      "key": "listAlbums",
+      "title": "Albums",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "listTracks",
+      "title": "Tracks",
+      "default": true
+    },
+    {
+      "type": "separator"
+    }
+  ],
+  "localizations": {
+    "de": [
+      {
+        "key": "bandcamp",
+        "title": "Bandcamp Einstellungen"
+      },
+      {
+        "key": "yearFormat",
+        "title": "Format für YEAR",
+        "description": "Formatierung des Feldes YEAR"
+      },
+      {
+        "key": "maxCoverQuality",
+        "title": "Höchstmögliche Qualität für Album-Cover"
+      },
+      {
+        "key": "searchResults",
+        "title": "Suchergebnisse beinhalten"
+      },
+      {
+        "key": "listAlbums",
+        "title": "Alben"
+      },
+      {
+        "key": "listTracks",
+        "title": "Titel"
+      }
+    ]
+  }
+}
