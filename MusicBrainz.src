@@ -6,6 +6,7 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2026-05-22] v1.16 CHG: prefer ALBUMARTIST over ARTIST for search field.
 # [2025-11-05] v1.15 CHG: complete rewrite to use JSON input instead of XML.
 #                    CHG: media title is now imported to SETSUBTITLE (instead of Disc Title).
 #                    NEW: added fields COMPILATION, MUSICBRAINZ_ALBUMTYPE, and ORIGYEAR.
@@ -37,7 +38,7 @@
 [AlbumUrl]=https://musicbrainz.org/ws/2/release/
 [WordSeparator]=+
 [IndexFormat]=%_preview%|%_coverurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
-[SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$if(%artist%,$regexp(%artist%,'[+!(){}\[\]^"~*?:\\]',),)||%20AND%20artist:%28%s%29
+[SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$regexp($if2(%albumartist%,%artist%),'[+!(){}\[\]^"~*?:\\]',)||%20AND%20artist:%28%s%29
 [UserAgent]=1
 [Encoding]=url-utf-8
 

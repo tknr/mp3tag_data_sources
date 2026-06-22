@@ -7,6 +7,9 @@
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.97b or above.
 #
+# [2026-05-22] v1.14 FIX: prevent composer metadata from being carried over from the previous standard track into subtracks.
+#                    CHG: automatically remove disambiguation numbers from ALBUMARTISTSORT.
+#                    CHG: skip the json_foreach loop for "extraartists" when the array is empty (avoid executing once on empty input).
 # [2025-11-12] v1.14 NEW: added support for importing COMPOSER from extra artist roles "Composed-By", "Music-By", "Songwriter", and "Written-By" (and variants thereof).
 #                    NEW: added support for importing MIXARTIST from extra artist role "Remix".
 #                    CHG: automatically remove disambiguation numbers from artist names.
@@ -171,6 +174,7 @@ sayrest
 # Sortkey
 outputto "ALBUMARTISTSORT"
 json_select "artists_sort"
+regexpreplace "\\s*\\(\\d+\\)$" ""
 sayrest
 
 # Artist or Albumartist
@@ -207,6 +211,8 @@ ifnot ""
 	sayoutput "TEMP_Artist"
 endif
 
+json_select_many_count "extraartists" "name" 1
+ifgreater 0
 json_foreach "extraartists"
 	json_select "role"
 
@@ -268,10 +274,14 @@ json_foreach "extraartists"
 		endif
 	endif
 json_foreach_end
+endif
 
 # Tracks
 json_foreach "tracklist"
 	json_select "type_"
+
+	set "TEMP_Composer"
+	set "TEMP_MixArtist"
 
 	if "index"
 		json_select "title"
@@ -315,6 +325,8 @@ json_foreach "tracklist"
 
 		set "TEMP_ComposerJoin"
 		set "TEMP_MixArtistJoin"
+		json_select_many_count "extraartists" "name" 1
+		ifgreater 0
 		json_foreach "extraartists"
 			json_select "role"
 
@@ -369,7 +381,7 @@ json_foreach "tracklist"
 				endif
 			endif
 		json_foreach_end
-
+		endif
 		json_foreach "sub_tracks"
 			json_select "type_"
 			if "track"
@@ -443,6 +455,8 @@ json_foreach "tracklist"
 
 				set "TEMP_ComposerJoin"
 				set "TEMP_MixArtistJoin"
+				json_select_many_count "extraartists" "name" 1
+				ifgreater 0
 				json_foreach "extraartists"
 					json_select "role"
 
@@ -499,7 +513,7 @@ json_foreach "tracklist"
 						endif
 					endif
 				json_foreach_end
-
+				endif
 				outputto "COMPOSER"
 				ifoutput "TEMP_Composer"
 					sayoutput "TEMP_Composer"
@@ -522,9 +536,6 @@ json_foreach "tracklist"
 			endif
 		json_foreach_end
 	endif
-
-	set "TEMP_Composer"
-	set "TEMP_MixArtist"
 
 	if "track"
 		json_select "position"
@@ -596,6 +607,8 @@ json_foreach "tracklist"
 
 		set "TEMP_ComposerJoin"
 		set "TEMP_MixArtistJoin"
+		json_select_many_count "extraartists" "name" 1
+		ifgreater 0
 		json_foreach "extraartists"
 			json_select "role"
 
@@ -650,6 +663,7 @@ json_foreach "tracklist"
 				endif
 			endif
 		json_foreach_end
+		endif
 
 		outputto "COMPOSER"
 		ifoutput "TEMP_Composer"
@@ -673,13 +687,13 @@ json_foreach "tracklist"
 	endif
 json_foreach_end
 
-outputto "Title"
+outputto "TITLE"
 sayoutput "TEMP_Title"
 
-outputto "Track"
+outputto "TRACK"
 sayoutput "TEMP_Track"
 
-outputto "Discnumber"
+outputto "DISCNUMBER"
 sayoutput "TEMP_Discnumber"
 
 set "TEMP_Artist"

@@ -1,0 +1,172 @@
+================================================================
+Beatport Mp3tag Scripts + Cloudflare-Bypass Proxy — SETUP GUIDE
+================================================================
+
+WHAT THIS IS
+------------
+Beatport blocks Mp3tag's direct HTTP requests via Cloudflare (403
+Forbidden). This package adds a small local proxy that impersonates
+a real Chrome browser (TLS fingerprint + headers via curl_cffi) and
+relays requests on behalf of Mp3tag.
+
+Architecture:
+    Mp3tag  ->  127.0.0.1:8787  ->  curl_cffi  ->  beatport.com
+
+The proxy runs in the system tray (right-click icon for menu).
+Auto-exits after 30 minutes of inactivity.
+
+
+REQUIREMENTS
+------------
+- Windows 10 / 11
+- Mp3tag v3.26+ (https://www.mp3tag.de/)
+- stevehero's Beatport v6 tag-source scripts (see step 2 below)
+
+The .exe bundles everything else (Python, curl_cffi).
+
+
+IMPORTANT — stevehero's scripts are NOT included
+------------------------------------------------
+This package does NOT ship stevehero's Beatport tag-source files
+(neither the originals nor modified copies). You must download the
+original scripts yourself and apply a few small edits by hand,
+following Modifications.txt. This is for licensing reasons until
+the author permits redistribution of the fixed versions.
+
+
+FILES IN THIS PACKAGE
+---------------------
+Proxy:
+    beatport_proxy.exe           Single-file proxy. Double-click to run.
+    Setup.txt                    This file.
+    Modifications.txt            Exact edits to apply to stevehero's
+                                 files so they route through the proxy.
+
+Source (only needed if you want to modify and rebuild the .exe):
+    source\beatport_proxy.py     Python source. The TRAY icon is
+                                 embedded inside it as base64.
+    source\Setup.bat             Creates .venv + installs deps.
+    source\Start Beatport Proxy.bat   Runs the .py from venv.
+    source\beatport_proxy.ico    File icon for the .exe (used by the
+                                 --icon flag when rebuilding).
+
+
+INSTALLATION ON A NEW COMPUTER
+------------------------------
+1. Copy beatport_proxy.exe to any folder.
+
+2. Install stevehero's original Beatport v6 scripts in Mp3tag.
+   Get them from the official thread:
+       https://community.mp3tag.de/t/ws-beatport-com-by-stevehero-release-single-track-artwork-tagging/12568
+   Place all "Beatport by &stevehero v6*.src", "*.inc", and
+   "*.settings" files into Mp3tag's sources folder:
+
+       %APPDATA%\Mp3tag\data\sources\
+
+   (Open Explorer, paste that path into the address bar, hit Enter.)
+
+3. Apply the edits described in Modifications.txt to those files.
+   In short: replace  https://www.beatport.com  with
+   http://127.0.0.1:8787  in the [BasedOn] / [IndexUrl] lines of the
+   .inc files and in the [SearchBy] URL templates of the "Direct"
+   .src files. Full before/after details are in Modifications.txt.
+
+   IMPORTANT: edit ONLY the .inc and "Direct" .src files — do NOT
+   touch the ".settings" file. Save as UTF-8 WITHOUT BOM (use
+   Notepad++ or VS Code; classic Notepad may add a BOM). A wrong
+   file or encoding causes errors like
+   "ERROR(Settings): expected value, got 'B'".
+
+4. Fully restart Mp3tag (File -> Exit, then reopen) so it reloads
+   the edited scripts.
+
+
+DAILY USE
+---------
+1. Double-click  beatport_proxy.exe.
+   A green "BP" icon appears in the system tray (next to the clock).
+
+2. In Mp3tag:
+     - Set the BEATPORT_TRACK_URL custom tag on the MP3 file to the
+       Beatport URL, e.g.
+           https://www.beatport.com/track/nightmare/1132890
+     - Right-click the file -> Tag Sources -> "TRACK Direct by
+       BEATPORT_TRACK_URL".
+     - Tags are fetched via the proxy.
+
+3. Right-click tray icon -> Quit when done.
+   Or just leave it — it auto-exits after 30 minutes of inactivity.
+
+Other Direct tag sources work too:
+  - TRACK Direct by BEATPORT_TRACK_ID  (set BEATPORT_TRACK_ID tag)
+  - RELEASE Direct by BEATPORT_RELEASE_ID
+  - RELEASE Direct by www(URL)         (set %www% tag)
+
+
+TRAY MENU
+---------
+Right-click the green "BP" tray icon:
+  Open log   — opens proxy.log in your default text editor.
+  Quit       — shuts down the proxy.
+
+
+HOW THE FIX WORKS (TECHNICAL)
+-----------------------------
+See Modifications.txt ("HOW IT WORKS" section) for the technical
+explanation of how the proxy bypasses Cloudflare and how requests
+are routed.
+
+
+CONFIGURATION (advanced)
+------------------------
+The .exe is built from beatport_proxy.py. To change behavior, edit
+the .py and rebuild with Setup.bat-prepared venv:
+
+    HOST = "127.0.0.1"
+    PORT = 8787
+    IMPERSONATE = "chrome124"     curl_cffi browser profile
+    IDLE_TIMEOUT = 1800           seconds (set 0 to disable)
+
+Rebuild:
+    cd "<this folder>"
+    Setup.bat
+    .\.venv\Scripts\pyinstaller.exe --onefile --windowed ^
+      --name beatport_proxy --icon beatport_proxy.ico ^
+      --collect-all curl_cffi --hidden-import pystray._win32 ^
+      beatport_proxy.py
+
+    (--icon sets the .exe file icon. Omit it to use the default.)
+
+
+TROUBLESHOOTING
+---------------
+* Mp3tag shows "403 Forbidden"
+  -> The proxy isn't running. Double-click beatport_proxy.exe.
+  -> Or a VPN / firewall is blocking 127.0.0.1. Disable VPN or
+     whitelist localhost.
+
+* Mp3tag shows "Connection error: http://127.0.0.1:8787/"
+  -> No tray icon visible — proxy crashed or didn't start.
+  -> Check proxy.log next to the .exe.
+  -> Make sure port 8787 isn't already used by something else.
+
+* No requests appear in proxy.log when using Mp3tag
+  -> Mp3tag is using cached .src/.inc from before the update.
+     Fully exit Mp3tag (File -> Exit) and reopen.
+  -> Or the .src/.inc files aren't in %APPDATA%\Mp3tag\data\sources.
+
+* Tray icon doesn't appear
+  -> Windows may have hidden it. Click the "^" arrow on the taskbar
+     near the clock to see hidden tray icons.
+
+Logs: proxy.log is written next to beatport_proxy.exe whenever the
+proxy runs. Useful for diagnosing what Mp3tag actually requests.
+
+
+CREDITS
+-------
+Original Mp3tag Beatport scripts: stevehero (v6.007).
+Proxy + Cloudflare-bypass adaptation: local modification (2026).
+curl_cffi:  https://github.com/lexiforest/curl_cffi
+pystray:    https://github.com/moses-palmer/pystray
+PyInstaller: https://pyinstaller.org/
