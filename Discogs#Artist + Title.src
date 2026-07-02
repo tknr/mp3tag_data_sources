@@ -1,19 +1,18 @@
 # ###################################################################
 # Mp3tag Tag Source for Discogs API (Official)
 #
-# Search by ARTIST and TITLE
+# Search by ARTIST and YEAR
 # 
 # This file should be stored in your tag sources sources directory
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.97b or above.
 #
-# [2026-05-22] v1.03 CHG: use Discogs convention of "Various" for various artists.
-# [2020-10-30] v1.02 CHG: changed to remove apostrophe from title
+# [2026-05-22] v1.02 CHG: use Discogs convention of "Various" for various artists.
 # [2019-11-11] v1.01 CHG: changed to use album artist instead of artist if present.
 #                    CHG: changed to use double pipe symbol as search-by delimiter.
 # [2019-09-09] v1.00
 #
 # ###################################################################
 
-[SearchBy]=Artist||$regexp($if2(%albumartist%,%artist%),^(va|various artists|v\.a\.)$,Various,1)||&artist=%s||Title||$replace(%title%,'',)||&track=%s
+[SearchBy]=Artist||$regexp($if2(%albumartist%,%artist%),^(va|various artists|v\.a\.)$,Various,1)||&artist=%s||Year||%year%||&year=%s
 [Include]=Discogs.inc
