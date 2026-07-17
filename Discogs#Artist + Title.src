@@ -14,5 +14,5 @@
 #
 # ###################################################################
 
-[SearchBy]=Artist||$regexp($if2(%albumartist%,%artist%),^(va|various artists|v\.a\.)$,Various,1)||&artist=%s||Year||%year%||&year=%s
+[SearchBy]=Artist||$regexp($if2(%albumartist%,%artist%),^(va|various artists|v\.a\.)$,Various,1)||&artist=%s||Title||$replace(%title%,'',)||&track=%s
 [Include]=Discogs.inc
