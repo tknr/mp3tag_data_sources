@@ -1,3 +1,0 @@
-[IndexUrl]=https://classical.music.apple.com/pl/search?l=pl&term=%s
-[SearchBy]=Szukać||[$if2([$if2(%ALBUMARTIST%,%ARTIST%)][ %ALBUM%],[%_directory%] [%_parent_directory%])]||%s
-[Include]=Apple Music Classical Web.inc
