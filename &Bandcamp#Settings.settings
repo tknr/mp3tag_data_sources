@@ -1,0 +1,85 @@
+{
+  "key": "Bandcamp",
+  "title": "Bandcamp Settings",
+  "settings": [
+    {
+      "type": "bool",
+      "key": "maxCoverQuality",
+      "title": "Highest quality for cover art",
+      "default": false
+    },
+    {
+	  "type": "separator",
+	  "key": "TrackNumbers",
+	  "title": "Format of track numbers and year field"
+	},
+    {
+      "type": "bool",
+      "key": "leadingZero",
+      "title": "Use leading zeros for track numbers (01, 02 ... 09)",
+       "default": false
+    },
+    {
+      "type": "bool",
+      "key": "appendTotals",
+      "title": "Append total count of tracks to track number",
+      "default": false
+    },
+    {
+      "type": "bool",
+      "key": "fullDateFormat",
+      "title": "Use full date format YYYY-MM-DD for year field",
+      "default": false
+    },
+    {
+      "type": "separator",
+      "key": "TrackTags",
+      "title": "Infos from track URL requests may differ from album infos, to compare them use"
+    },
+    {
+      "type": "bool",
+      "key": "SeparateTags",
+      "title": "Separate COMMENT, CREDITS, GENRE and KEYWORDS tags for track requests",
+      "default": true
+    },
+    {
+      "type": "separator"
+    }
+  ],
+  "localizations": {
+    "de": [
+      {
+        "key": "Bandcamp",
+        "title": "Bandcamp Einstellungen"
+      },
+      {
+        "key": "maxCoverQuality",
+        "title": "Höchstmögliche Qualität für Album-Cover"
+      },
+      {
+	    "key": "TrackNumbers",
+	    "title": "Format von Track-Nummern und des Jahr-Feldes"
+	  },
+      {
+        "key": "leadingZero",
+        "title": "Verwende führende Nullen bei den Track-Nummern (01, 02 ... 09)"
+      },
+      {
+        "key": "appendTotals",
+        "title": "Hänge die gesamte Anzahl der Tracks an die Track-Nummern an"
+      },
+      {
+        "key": "fullDateFormat",
+        "title": "Verende das volle Datumsformat YYYY-MM-DD im Jahr-Feld"
+      },
+      {
+        "key": "TrackTags",
+        "title": "Infos für Tracks können sich von denen des Album unterscheiden, für Vergleiche verwende"
+      },
+      {
+        "key": "SeparateTags",
+        "title": "Separate COMMENT, CREDITS, GENRE und KEYWORDS Tags für Track-Anfragen."
+      }
+    ]
+  }
+}

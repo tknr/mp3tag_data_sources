@@ -1,0 +1,17 @@
+# Bandcamp Tag Source for Mp3tag
+#
+# Initial release by ms6676749.
+# See CHANGELOG.md for a list of changes.
+
+[Name]=Bandcamp
+[BasedOn]=bandcamp.com
+[AlbumUrl]=%s
+[WordSeparator]=%20
+[SearchBy]=URL||$ifgreater($strstr(%www%,.bandcamp.com/),0,%www%,)||%s
+[Encoding]=utf-8
+[Settings]=&Bandcamp#Settings.Settings
+[MinAppVersionWin]=3.22
+[MinAppVersionMac]=1.8.6
+[Version]=0.4.4
+
+[Include]=&Bandcamp#ParserScriptAlbum.inc
