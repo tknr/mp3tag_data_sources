@@ -1,0 +1,142 @@
+{
+  "key": "deezer",
+  "title": "Deezer Settings",
+  "settings": [
+	{
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "CoverSettings",
+	  "title": "Cover art"
+	},
+	{
+	  "type": "string",
+	  "key": "CoverResolution",
+	  "title": "Select resolution for cover art",
+	  "choices": [
+		"1500x1500",
+		"1200x1200",
+		"900x900",
+		"600x600",
+		"300x300"
+	  ],
+	  "default": "1200x1200"
+	},
+	{
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "TrackTitles",
+	  "title": "Track titles"
+	},
+	{
+	  "type": "bool",
+	  "key": "titleVersion",
+	  "title": "Append version description to track title",
+	  "default": false
+	},
+	{
+	  "type": "bool",
+	  "key": "standardUppercase",
+	  "title": "Apply standard capitalization to album and track title",
+	  "default": false
+	},
+	{
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "TrackNumbers",
+	  "title": "Format of track numbers and disc numbers"
+	},
+	{
+	  "type": "bool",
+	  "key": "leadingZero",
+	  "title": "Use leading zeros for track numbers (01, 02 ... 09)",
+	  "default": false
+	},
+	{
+	  "type": "bool",
+	  "key": "prepenDiscnumber",
+	  "title": "Print disc number in front of track number (multi disc only, implies leading zeros)",
+	  "default": false
+	},
+	{
+	  "type": "bool",
+	  "key": "appendTotals",
+	  "title": "Append track and disc totals to track and disc number",
+	  "default": false
+	},
+	{
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "involvedPeople",
+	  "title": "Involved people"
+	},
+	{
+	  "type": "bool",
+	  "key": "includeAuthor",
+	  "title": "Include author in composer field (checked) or in lyricist field (unchecked)",
+	  "default": false
+	},
+	{
+	  "type": "separator"
+	}
+  ],
+  "localizations": {
+	"de": [
+	  {
+		"key": "deezer",
+		"title": "Deezer Einstellungen"
+	  },
+	  {
+		"key": "CoverSettings",
+		"title": "Cover Bilder"
+	  },
+	  {
+		"key": "CoverResolution",
+		"title": "Wähle die Auflösung für Cover-Bilder"
+	  },
+	  {
+		"key": "TrackNumbers",
+		"title": "Format von Track-Nummern und Disc-Nummern"
+	  },
+	  {
+		"key": "leadingZero",
+		"title": "Verwende führende Nullen bei Track_Nummern (01, 02 ... 09)"
+	  },
+	  {
+		"key": "prepenDiscnumber",
+		"title": "Stelle Disc-Nummern den Track-Nummern voran (nur Multi-Discs, impliziert führende Nullen)"
+	  },
+	  {
+		"key": "appendTotals",
+		"title": "Hänge Summe der Tracks und Discs an Track- und Disc-Nummern an"
+	  },
+	  {
+		"key": "TrackTitles",
+		"title": "Track-Titel"
+	  },
+	  {
+		"key": "titleVersion",
+		"title": "Hänge Versions-Info an Track-Titel an"
+	  },
+	  {
+		"key": "standardUppercase",
+		"title": "Verwende Großschreibung für alle Wörter in Album- und Track-Titeln"
+	  },
+	  {
+		"key": "involvedPeople",
+		"title": "Beteiligte Personen"
+	  },
+	  {
+		"key": "includeAuthor",
+		"title": "Nenne Autoren bei Komponisten (ausgewählt) oder Lyrikern (nicht ausgewählt)"
+	  }
+	]
+  }
+}

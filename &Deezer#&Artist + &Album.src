@@ -1,0 +1,35 @@
+﻿################################################################################
+# Mp3tag Tag Source for Deezer v1.31 [2026-08-16]                              #
+#                                                                              #
+# Created by vikaesar                                                          #
+# Enhanced by yorickausyps                                                     #
+#                                                                              #
+# INSTRUCTIONS: This file needs to be stored in Mp3tag's tag sources           #
+#               directory:                                                     #
+#               %APPDATA%\Mp3tag\data\sources                                  #
+#                                                                              #
+# CHANGELOG                                                                    #
+#                                                                              #
+# [2026-07-24]  v1.30  See Readme.md                                           #
+# [2024-05-01]  v1.20  Add ReplayGain tag                                      #
+# [2022-12-19]  v1.10  Add track "version" to title instead of comment		   #
+# [2019-05-25]  v1.00  Initial release                                         #
+################################################################################
+
+[Name]=Deezer
+[BasedOn]=www.deezer.com
+
+[SearchBy]=Artist||$if2(%albumartist%,%artist%)||%s||Album||%album%||%20%s
+
+[AlbumUrl]=
+[IndexUrl]=https://www.deezer.com/search/%s
+[IndexFormat]=%_coverurl%|%_coverfullurl%|%_preview%|%_url%|%Match%|%Artist%|%Album%|%Title%|%Track(s)%|%Date%
+
+[WordSeparator]=%20
+[UserAgent]=1
+[Encoding]=url-utf-8
+[MinAppVersionWin]=3.32
+[MinAppVersionMac]=1.9.13
+[Settings]=&Deezer#&Settings.settings
+[Include]=&Deezer#ParserScriptIndex.inc
+[Include]=&Deezer#ParserScriptAlbum.inc
