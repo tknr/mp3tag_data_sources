@@ -1,0 +1,6 @@
+#----------------------------------------------------------------------------#   
+#--------------- SoundCloud Cover Image by Artist & Title or URL ------------#
+#----------------------------------------------------------------------------#
+
+[SearchBy]=Search by Artist||%artist%||%s||Title||%title%||%s
+[Include]=SoundCloud WS V2.inc
