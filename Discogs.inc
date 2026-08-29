@@ -7,6 +7,7 @@
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.97b or above.
 #
+# [2026-08-21] v1.21 NEW: added support for previewing the cover to be imported.
 # [2026-05-22] v1.20 FIX: prevent composer metadata from being carried over from the previous standard track into subtracks.
 #                    CHG: automatically remove disambiguation numbers from ALBUMARTISTSORT.
 #                    CHG: skip the json_foreach loop for "extraartists" when the array is empty (avoid executing once on empty input).
@@ -53,7 +54,7 @@
 [IndexUrl]=https://api.discogs.com/database/search?type=release&per_page=100
 [AlbumUrl]=
 [WordSeparator]=%20
-[IndexFormat]=%Cover%|%Artist%|%Album%|%_url%|%Format%|%Year%|%Label%|%Catalog%|%Country%|%Barcode%|%_coverurl%|%_preview%
+[IndexFormat]=%Cover%|%Artist%|%Album%|%_url%|%Format%|%Year%|%Label%|%Catalog%|%Country%|%Barcode%|%_coverurl%|%_coverfullurl%|%_preview%
 [UserAgent]=1
 [Encoding]=url-utf-8
 
@@ -134,6 +135,11 @@ ifnot "0"
 			say "http://cache.mp3tag.de/coxy"
 			sayregexp "(?<=\.com).*"
 		endif
+		say "|"
+
+		# Full Cover Preview
+		json_select "cover_image"
+		SayRest
 		say "|"
 
 		# Preview

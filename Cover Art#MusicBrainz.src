@@ -6,6 +6,8 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2026-08-21] v1.05 NEW: added support for previewing the cover to be imported.
+#                    CHG: complete rewrite to use JSON input instead of XML.
 # [2024-05-13] v1.04 NEW: added support for cover thumbnails in list of query results. 
 # [2020-01-13] v1.03 CHG: changed to use multi-field search option in SearchBy
 #                    FIX: release type was not parsed anymore
@@ -18,11 +20,11 @@
 
 [Name]=MusicBrainz
 [BasedOn]=musicbrainz.org
-[IndexUrl]=http://musicbrainz.org/ws/2/release/?limit=50&query=
-[AlbumUrl]=http://musicbrainz.org/ws/2/release/
+[IndexUrl]=https://musicbrainz.org/ws/2/release/?fmt=json&limit=50&query=
+[AlbumUrl]=https://musicbrainz.org/ws/2/release/
 [WordSeparator]=+
-[IndexFormat]=%_preview%|%_coverurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
-[SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$if(%artist%,$regexp(%artist%,'[+!(){}\[\]^"~*?:\\]',),)||%20AND%20artist:%28%s%29
+[IndexFormat]=%_preview%|%_coverurl%|%_coverfullurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
+[SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$regexp($if2(%albumartist%,%artist%),'[+!(){}\[\]^"~*?:\\]',)||%20AND%20artist:%28%s%29
 [UserAgent]=1
 [Encoding]=url-utf-8
 
@@ -31,99 +33,140 @@
 #					I  N  D  E  X
 # ###################################################################
 
-findline "<release-list"
-joinuntil "</release-list>"
 replace "|" "$verticalBar()"
+json "ON" "current"
+Trim "off"
 
-do
+json_foreach "releases"
+
 	# Preview
-	say "http://musicbrainz.org/release/"
-	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	json_select "id"
+	say "https://musicbrainz.org/release/"
+	sayrest
 	say "|"
 
 	# Cover Preview
-	say "https://coverartarchive.org/release/"
-	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
+	json_select "id"
+	say "http://coverartarchive.org/release/"
+	sayrest
 	say "/front-250"
 	say "|"
 
+	# Full Cover Preview
+	json_select "id"
+	say "http://coverartarchive.org/release/"
+	sayrest
+	say "/front"
+	say "|"
+
 	# URL
-	sayregexp "(?<= id=\")[-0-9a-y]{34,40}(?=\" )" ", " "<title>"
-	say "?inc=artists+artist-credits+labels+recordings+release-groups"
+	json_select "id"
+	sayrest
+	say "?inc=artists+artist-credits+labels+recordings+release-groups+isrcs&fmt=json"
 	say "|"
 
 	# Score
-	findinline ":score=\""
-	sayuntil "\""
+	json_select "score"
+	sayrest
 	say "|"
 
 	# Type
-	sayregexp "(?<=\">)[^<]+(?=</primary-type>)" ", " "</release-group>"
+	json_select_object "release-group"
+	json_select "primary-type"
+	sayrest
+	json_unselect_object
 	say "|"
 
 	# Artist
-	sayregexp "(?<=<name>)[^<]+(?=</name><a)" ", " "</artist-credit>"
-	say "|"
+	json_select_object "artist-credit"
+	json_foreach "artist-credit"
+		json_select "name"
+		sayrest
+		json_select "joinphrase"
+		ifnot ""
+			sayrest
+		endif
+	json_foreach_end
+    json_unselect_object
+    say "|"
 
-	# Album
-	findinline "<title>"
-	sayuntil "</title>"
+    # Album
+	json_select "title"
+	sayrest
 	say "|"
 
 	# Tracks
-	sayregexp "(?<=<track-list count=\")\d+(?=\")" ", " "</release>"
+	json_select "track-count"
+	sayrest
 	say "|"
 
 	# Year
-	sayregexp "(?<=release-group><date>)[-0-9]{4,10}(?=</date>)" ", " "</release>"
+	json_select "date"
+	sayrest
 	say "|"
 
 	# Country
-	sayregexp "(?<=country>)[^<]+(?=<)" ", " "</release>"
+	json_select "country"
+	sayrest
 	say "|"
 
 	# Format
-	sayregexp "(?<=format>)[^<]+(?=<)" ", " "</release>"
+	json_select_many "media" "format" ", "
+	sayrest
 	say "|"
 
 	# Label
-	sayregexp "(?<=<name>)[^<]+(?=</name></label>)" ", " "</release>"
+	json_select_array "label-info" 1
+	json_select_object "label"
+	json_select "name"
+	sayrest
+	json_unselect_object
 	say "|"
 
 	# Catalog-number
-	sayregexp "(?<=catalog-number>)[^<]+(?=<)" ", " "</release>"
+	json_select "catalog-number"
+	json_unselect_object
+	sayrest
+
 	saynewline
 
-	findinline "</release>"
-while "<release "
-
+json_foreach_end
 
 [ParserScriptAlbum]=...
 # ###################################################################
 #					A  L  B  U  M
 # ###################################################################
 
-joinuntil "</metadata>"
+replace "|" "$verticalBar()"
+json "ON" "current"
+Trim "off"
+
+# MusicBrainz Album ID
+outputto "MUSICBRAINZ_ALBUMID"
+json_select "id"
+sayrest
+
+# ASIN
+outputto "ASIN"
+json_select "asin"
+sayrest
 
 # Cover via CoverArtArchive
-findinline "<artwork>" 1 1
-if "true"
-	findline "<?xml"
-	findinline "<release id=\""
-	outputto "coverurl"
+outputto "coverurl"
+json_select_object "cover-art-archive"
+json_select "front"
+if "1"
 	say "http://coverartarchive.org/release/"
-	sayuntil "\""
+	sayoutput "MUSICBRAINZ_ALBUMID"
 	say "/front"
 else
-#Cover via ASIN
-	findline "<?xml"
-	findinline "<asin>" 1 1
-	movechar -6
-	if "<asin>"
-		outputto "coverurl"
-		movechar 6
+	ifoutput "asin"
 		say "http://images.amazon.com/images/P/"
-		sayuntil "</asin>"
+		sayoutput "asin"
 		say ".01.LZZZZZZZ.jpg"
 	endif
 endif
+json_unselect_object
+
+set "ASIN"
+set "MUSICBRAINZ_ALBUMID"

@@ -6,6 +6,7 @@
 # This file needs to be stored in Mp3tag's tag sources directory. 
 # %APPDATA%\Mp3tag\data\sources
 #
+# [2026-08-21] v1.17 NEW: added support for previewing the cover to be imported.
 # [2026-05-22] v1.16 CHG: prefer ALBUMARTIST over ARTIST for search field.
 # [2025-11-05] v1.15 CHG: complete rewrite to use JSON input instead of XML.
 #                    CHG: media title is now imported to SETSUBTITLE (instead of Disc Title).
@@ -37,7 +38,7 @@
 [IndexUrl]=https://musicbrainz.org/ws/2/release/?fmt=json&limit=50&query=
 [AlbumUrl]=https://musicbrainz.org/ws/2/release/
 [WordSeparator]=+
-[IndexFormat]=%_preview%|%_coverurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
+[IndexFormat]=%_preview%|%_coverurl%|%_coverfullurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
 [SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$regexp($if2(%albumartist%,%artist%),'[+!(){}\[\]^"~*?:\\]',)||%20AND%20artist:%28%s%29
 [UserAgent]=1
 [Encoding]=url-utf-8
@@ -64,6 +65,13 @@ json_foreach "releases"
 	say "http://coverartarchive.org/release/"
 	sayrest
 	say "/front-250"
+	say "|"
+
+	# Full Cover Preview
+	json_select "id"
+	say "http://coverartarchive.org/release/"
+	sayrest
+	say "/front"
 	say "|"
 
 	# URL
