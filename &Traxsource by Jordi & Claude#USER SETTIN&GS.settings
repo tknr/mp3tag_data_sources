@@ -1,0 +1,154 @@
+{
+  "key": "SettingTraxsource",
+  "title": "Traxsource by Jordi - Settings",
+  "settings": [
+
+    {
+      "type": "heading",
+      "key": "HeadingFormats",
+      "title": "Format Options"
+    },
+    {
+      "type": "string",
+      "key": "SettingYearFormat",
+      "title": "YEAR Format",
+      "description": "Format for the YEAR field. [Default: YYYY-MM-DD]",
+      "choices": [
+        "YYYY-MM-DD",
+        "YYYY",
+        "DD-MM-YYYY"
+      ],
+      "default": "YYYY-MM-DD"
+    },
+    {
+      "type": "string",
+      "key": "SettingInitialKeyFormat",
+      "title": "INITIALKEY Format",
+      "description": "Key as shown on Traxsource (e.g. Cmin, F#maj). No Camelot conversion available — that requires BPM+key lookup. [Default: Traxsource]",
+      "choices": [
+        "Traxsource"
+      ],
+      "default": "Traxsource"
+    },
+
+    {
+      "type": "heading",
+      "key": "HeadingDisableFields",
+      "title": "Disable Fields (uncheck to clear/not write)"
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteTitle",
+      "title": "Write TITLE",
+      "description": "Write TITLE field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteArtist",
+      "title": "Write ARTIST",
+      "description": "Write ARTIST field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteMixArtist",
+      "title": "Write MIXARTIST (Remixers)",
+      "description": "Write MIXARTIST field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWritePublisher",
+      "title": "Write PUBLISHER (Label)",
+      "description": "Write PUBLISHER field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteBpm",
+      "title": "Write BPM",
+      "description": "Write BPM field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteKey",
+      "title": "Write INITIALKEY",
+      "description": "Write INITIALKEY field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteGenre",
+      "title": "Write GENRE",
+      "description": "Write GENRE field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteYear",
+      "title": "Write YEAR",
+      "description": "Write YEAR field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteLength",
+      "title": "Write LENGTH",
+      "description": "Write LENGTH field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteCover",
+      "title": "Write COVERURL",
+      "description": "Write COVERURL field",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteWww",
+      "title": "Write WWW",
+      "description": "Write WWW field (Traxsource track URL)",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteComment",
+      "title": "Write COMMENT",
+      "description": "Write COMMENT field (tagger credit)",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteReleasetime",
+      "title": "Write RELEASETIME (Rekordbox)",
+      "description": "Write RELEASETIME field in ISO 8601 format for Rekordbox",
+      "default": false
+    },
+    {
+      "type": "bool",
+      "key": "SettingWriteTrackIds",
+      "title": "Write TRAXSOURCE_TRACKID / TRAXSOURCE_TITLEID",
+      "description": "Write Traxsource internal ID fields",
+      "default": true
+    }
+  ],
+  "localizations": {
+    "de": [
+      {
+        "key": "SettingTraxsource",
+        "title": "Traxsource by Jordi - Einstellungen"
+      },
+      {
+        "key": "HeadingFormats",
+        "title": "Format-Optionen"
+      },
+      {
+        "key": "HeadingDisableFields",
+        "title": "Felder deaktivieren"
+      }
+    ]
+  }
+}

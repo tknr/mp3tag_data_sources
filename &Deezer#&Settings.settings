@@ -85,6 +85,20 @@
 	},
 	{
 	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "AlbumURL",
+	  "title": "Album URL"
+	},
+	{
+	  "type": "bool",
+	  "key": "WWWDeezer",
+	  "title": "Use \"WWW DEEZER\" for album URL of the used web source",
+	  "default": false
+	},
+	{
+	  "type": "separator"
 	}
   ],
   "localizations": {
@@ -136,6 +150,10 @@
 	  {
 		"key": "includeAuthor",
 		"title": "Nenne Autoren bei Komponisten (ausgewählt) oder Lyrikern (nicht ausgewählt)"
+      },
+	  {
+	    "key": "WWWDeezer",
+	    "title": "Verwende \"WWW DEEZER\" für den Album-URL der Websource"
 	  }
 	]
   }

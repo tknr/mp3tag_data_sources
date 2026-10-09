@@ -19,7 +19,7 @@
 [Name]=Deezer
 [BasedOn]=www.deezer.com
 
-[SearchBy]=URL||$ifgreater($strstr(%www%,.deezer.com/),0,%www%,)||%s
+[SearchBy]=URL||$ifgreater($strstr($if2(%www deezer%,%www%),.deezer.com/),0,$if2(%www deezer%,%www%),)||%s
 
 [AlbumUrl]=%s
 

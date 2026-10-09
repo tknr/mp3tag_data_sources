@@ -68,7 +68,11 @@ json_select "ART_ID"
 SayRest
 
 # Album URL
-OutputTo "WWW"
+IfVar "WWWDeezer" "true"
+	OutputTo "WWW DEEZER"
+Else
+	OutputTo "WWW"
+EndIf
 SayOutput "CurrentUrl"
 
 # Album artist (only main_artist)

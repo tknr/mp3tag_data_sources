@@ -1,0 +1,9 @@
+
+=== 2026-09-16 14:25:52  v2.6.0 ====================
+2026-09-16 14:25:52  Server listening on 127.0.0.1:8787  (impersonate=chrome150)
+2026-09-16 14:25:52  [browser] no Chromium browser found (Edge/Chrome/Brave); Beatport challenge solving disabled; update Microsoft Edge or install Chrome
+2026-09-16 14:25:52  [update] up to date (v2.6.0)
+
+=== 2026-09-16 14:33:47  v2.6.0 ====================
+2026-09-16 14:33:47  [fatal] another instance is already running, exiting
+2026-09-16 14:55:52  [exit] idle 1800s > 1800s

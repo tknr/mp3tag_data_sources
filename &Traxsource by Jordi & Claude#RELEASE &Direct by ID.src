@@ -1,0 +1,2 @@
+[SearchBy]=$trim(%TRAXSOURCE_TITLEID%)
+[Include]=Traxsource by Jordi & Claude#RELEASE Direct by ID.inc

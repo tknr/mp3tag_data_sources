@@ -2,7 +2,11 @@
 
 # Changes
 
-## [2026-08-28]  v1.32  by @yorickausyps
+## [2026-09-17]  v1.33  by @yorickausyps
+
+- Added configuration setting to use "WWW DEEZER" to store the Deezer URL used as web source.
+
+## [2026-08-25]  v1.32  by @yorickausyps
 
 - New support for cover preview button on list of search result screen since mp3tag version 3.36-beta6. For this new feature to work you need to update to mp3tag version 3.36.
 - Extended standard capitalization to album and track titles and by preserving uppercase letters.
