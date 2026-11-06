@@ -1,0 +1,172 @@
+﻿# ###################################################################
+# Mp3tag Tag Source for Cover Art from MusicBrainz API v2 (Official)
+#
+# Search by ARTIST and ALBUM
+#
+# This file needs to be stored in Mp3tag's tag sources directory. 
+# %APPDATA%\Mp3tag\data\sources
+#
+# [2026-08-21] v1.05 NEW: added support for previewing the cover to be imported.
+#                    CHG: complete rewrite to use JSON input instead of XML.
+# [2024-05-13] v1.04 NEW: added support for cover thumbnails in list of query results. 
+# [2020-01-13] v1.03 CHG: changed to use multi-field search option in SearchBy
+#                    FIX: release type was not parsed anymore
+# [2019-10-18] v1.02 FIX: adapted to new response format.
+# [2018-07-02] v1.01 CHG: included artist in search query.
+#                    FIX: extended namespace alias changed on server.
+# [2018-01-27] v1.00 based on Tag Source for MusicBrainz API v1 by dano
+#
+# ###################################################################
+
+[Name]=MusicBrainz
+[BasedOn]=musicbrainz.org
+[IndexUrl]=https://musicbrainz.org/ws/2/release/?fmt=json&limit=50&query=
+[AlbumUrl]=https://musicbrainz.org/ws/2/release/
+[WordSeparator]=+
+[IndexFormat]=%_preview%|%_coverurl%|%_coverfullurl%|%_url%|%Score%|%Type%|%Artist%|%Album%|%Tracks%|%Year%|%Country%|%Format%|%Publisher%|%CatNo%
+[SearchBy]=Album||$regexp(%album%,'[+!(){}\[\]^"~*?:\\]',)||release:%s||Artist||$regexp($if2(%albumartist%,%artist%),'[+!(){}\[\]^"~*?:\\]',)||%20AND%20artist:%28%s%29
+[UserAgent]=1
+[Encoding]=url-utf-8
+
+[ParserScriptIndex]=...
+# ###################################################################
+#					I  N  D  E  X
+# ###################################################################
+
+replace "|" "$verticalBar()"
+json "ON" "current"
+Trim "off"
+
+json_foreach "releases"
+
+	# Preview
+	json_select "id"
+	say "https://musicbrainz.org/release/"
+	sayrest
+	say "|"
+
+	# Cover Preview
+	json_select "id"
+	say "http://coverartarchive.org/release/"
+	sayrest
+	say "/front-250"
+	say "|"
+
+	# Full Cover Preview
+	json_select "id"
+	say "http://coverartarchive.org/release/"
+	sayrest
+	say "/front"
+	say "|"
+
+	# URL
+	json_select "id"
+	sayrest
+	say "?inc=artists+artist-credits+labels+recordings+release-groups+isrcs&fmt=json"
+	say "|"
+
+	# Score
+	json_select "score"
+	sayrest
+	say "|"
+
+	# Type
+	json_select_object "release-group"
+	json_select "primary-type"
+	sayrest
+	json_unselect_object
+	say "|"
+
+	# Artist
+	json_select_object "artist-credit"
+	json_foreach "artist-credit"
+		json_select "name"
+		sayrest
+		json_select "joinphrase"
+		ifnot ""
+			sayrest
+		endif
+	json_foreach_end
+    json_unselect_object
+    say "|"
+
+    # Album
+	json_select "title"
+	sayrest
+	say "|"
+
+	# Tracks
+	json_select "track-count"
+	sayrest
+	say "|"
+
+	# Year
+	json_select "date"
+	sayrest
+	say "|"
+
+	# Country
+	json_select "country"
+	sayrest
+	say "|"
+
+	# Format
+	json_select_many "media" "format" ", "
+	sayrest
+	say "|"
+
+	# Label
+	json_select_array "label-info" 1
+	json_select_object "label"
+	json_select "name"
+	sayrest
+	json_unselect_object
+	say "|"
+
+	# Catalog-number
+	json_select "catalog-number"
+	json_unselect_object
+	sayrest
+
+	saynewline
+
+json_foreach_end
+
+[ParserScriptAlbum]=...
+# ###################################################################
+#					A  L  B  U  M
+# ###################################################################
+
+replace "|" "$verticalBar()"
+json "ON" "current"
+Trim "off"
+
+# MusicBrainz Album ID
+outputto "MUSICBRAINZ_ALBUMID"
+json_select "id"
+sayrest
+
+# ASIN
+outputto "ASIN"
+json_select "asin"
+sayrest
+
+# Cover via CoverArtArchive
+outputto "coverurl"
+json_select_object "cover-art-archive"
+json_select "front"
+if "1"
+	say "http://coverartarchive.org/release/"
+	sayoutput "MUSICBRAINZ_ALBUMID"
+	say "/front"
+else
+	ifoutput "asin"
+		say "http://images.amazon.com/images/P/"
+		sayoutput "asin"
+		say ".01.LZZZZZZZ.jpg"
+	endif
+endif
+json_unselect_object
+
+set "ASIN"
+set "MUSICBRAINZ_ALBUMID"
