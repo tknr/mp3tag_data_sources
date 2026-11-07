@@ -1,11 +1,16 @@
 [ParserScriptAlbum]=...
-# ###################################################################
+#####################################################################
 #					A  L  B  U  M
-# ###################################################################
+#####################################################################
+## Comment/uncomment for debugging purposes:
+#DebugWriteInput "bandcamp-album-input.out"
+#Debug "ON" "bandcamp-album-debug.out"
 
-JoinUntil "</html>"
-RegexpReplace "<!DOCTYPE\s+.+?json\">" "" # Extract embedded JSON
-RegexpReplace "</script>.+?</html>.*" ""
+# extract embedded Json data
+FindLine "<script type=\"application/ld+json\">"
+JoinUntil "</script>"
+RegexpReplace "^.*?json\">\s*" ""
+RegexpReplace "</script>.*" ""
 Replace "|" "$verticalBar()"
 
 json "ON" "current"
@@ -62,13 +67,22 @@ If "MusicAlbum"
 
 	OutputTo "ALBUM"
 	json_select "name"
-	SayRest
+	IfVar "standardUppercase" "true"
+		SayFormat "$caps2(%_current%)"
+	Else
+		SayRest
+	EndIf
 
 	OutputTo "TOTALTRACKS"
 	json_select "numTracks"
 	SayRest
 
-	OutputTo "WWW"
+	# Album URL
+	IfVar "WWWBandcamp" "true"
+		OutputTo "WWW BANDCAMP"
+	Else
+		OutputTo "WWW"
+	EndIf
 	json_select "mainEntityOfPage"
 	SayRest
 
@@ -91,9 +105,16 @@ If "MusicAlbum"
 
 		json_select_object "item"
 
-		OutputTo "TRACKS"
+		OutputTo "TITLE"
 		json_select "name"
-		SayRest
+		IfVar "standardUppercase" "true"
+			SayFormat "$caps2(%_current%)"
+		Else
+			SayRest
+		EndIf
+		Say "|"
+
+		OutputTo "TRACKS"
 		Say "|"
 
 		OutputTo "ARTIST"
@@ -142,7 +163,11 @@ Else
 	If "inAlbum"
 		OutputTo "ALBUM"
 		json_select "name"
-		SayRest
+		IfVar "standardUppercase" "true"
+			SayFormat "$caps2(%_current%)"
+		Else
+			SayRest
+		EndIf
 		json_select_object "byArtist"
 		If "byArtist"
 			OutputTo "_TEMP_ARTIST"
@@ -171,9 +196,16 @@ Else
 	json_foreach_end
 	Say "|"
 	
-	OutputTo "TRACKS"
+	OutputTo "TITLE"
 	json_select "name"
-	SayRest
+	IfVar "standardUppercase" "true"
+		SayFormat "$caps2(%_current%)"
+	Else
+		SayRest
+	EndIf
+	Say "|"
+
+	OutputTo "TRACKS"
 	Say "|"
 
 	OutputTo "ISRC"
@@ -205,7 +237,7 @@ If "publisher"
 	json_select "genre"
 	RegexpReplace "https://bandcamp.com/discover/(.+?)" "$1"
 	RegexpReplace "https://bandcamp.com/tag/(.+?)" "$1"
-	SayFormat "$caps(%_current%)"
+	SayFormat "$caps2(%_current%)"
 	json_unselect_object
 EndIf
 
@@ -222,7 +254,7 @@ ifnot ""
 	MoveChar -4
 	If "http"
 		OutputTo "COMMENT URL"
-		SayRegexp "(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+bandcamp\.com(?:\/[^\s]*)?" "\\\\"
+		SayRegexp "(?:https?://)?(?:[a-zA-Z0-9-]+\.)+bandcamp\.com(?:/[^\s]*)?" "\\\\"
 	Endif
 Endif
 

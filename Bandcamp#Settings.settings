@@ -3,15 +3,26 @@
   "title": "Bandcamp Settings",
   "settings": [
     {
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "CoverSettings",
+	  "title": "Cover art"
+    },
+    {
       "type": "bool",
       "key": "maxCoverQuality",
       "title": "Highest quality for cover art",
       "default": false
     },
     {
-	  "type": "separator",
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
 	  "key": "TrackNumbers",
-	  "title": "Format of track numbers and year field"
+	  "title": "Format of track numbers, titles and year field"
 	},
     {
       "type": "bool",
@@ -27,12 +38,21 @@
     },
     {
       "type": "bool",
+      "key": "standardUppercase",
+      "title": "Apply standard capitalization to titles",
+      "default": false
+    },
+    {
+      "type": "bool",
       "key": "fullDateFormat",
       "title": "Use full date format YYYY-MM-DD for year field",
       "default": false
     },
     {
-      "type": "separator",
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
       "key": "TrackTags",
       "title": "Infos from track URL requests may differ from album infos, to compare them use"
     },
@@ -42,6 +62,20 @@
       "title": "Separate COMMENT, CREDITS, GENRE and KEYWORDS tags for track requests",
       "default": true
     },
+	{
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "AlbumURL",
+	  "title": "Album URL"
+	},
+	{
+	  "type": "bool",
+	  "key": "WWWBandcamp",
+	  "title": "Use \"WWW BANDCAMP\" for album URL of the used web source",
+	  "default": false
+	},
     {
       "type": "separator"
     }
@@ -51,6 +85,10 @@
       {
         "key": "Bandcamp",
         "title": "Bandcamp Einstellungen"
+      },
+      {
+      "key": "CoverSettings",
+      "title": "Cover Bilder"
       },
       {
         "key": "maxCoverQuality",
@@ -73,13 +111,21 @@
         "title": "Verende das volle Datumsformat YYYY-MM-DD im Jahr-Feld"
       },
       {
+        "key": "standardUppercase",
+        "title": "Verwende Großschreibung für alle Wörter in Titeln"
+      },
+      {
         "key": "TrackTags",
         "title": "Infos für Tracks können sich von denen des Album unterscheiden, für Vergleiche verwende"
       },
       {
         "key": "SeparateTags",
-        "title": "Separate COMMENT, CREDITS, GENRE und KEYWORDS Tags für Track-Anfragen."
-      }
-    ]
+        "title": "Separate COMMENT, CREDITS, GENRE und KEYWORDS Tags für Track-Anfragen"
+      },
+	  {
+	    "key": "WWWBandcamp",
+	    "title": "Verwende \"WWW BANDCAMP\" für den Album-URL der Websource"
+	  }
+     ]
   }
 }

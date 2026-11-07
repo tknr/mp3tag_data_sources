@@ -1,5 +1,10 @@
 # Changelog — Bandcamp Tag Source for Mp3tag
 
+## 0.4.9 (2026-09-17) @yorickausyps
+
+- Added configuration setting to use "WWW BANDCAMP" to store the Bandcamp URL used as web source.
+- Added configuration setting to apply standard capitalization to album and track titles, by preserving uppercase letters.
+
 ## 0.4.8 (2026-07-02) @yorickausyps
 
 - Added configuration setting to select track numbers with leading zeros and to append total track count to track numbers.
