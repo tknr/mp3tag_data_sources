@@ -1,5 +1,18 @@
 # Changelog — Bandcamp Tag Source for Mp3tag
 
+## 0.5.1 (2026-11-13) @yorickausyps
+
+- Added full cover preview to search results.
+- Added configuration setting to enable the use of mp3tag proxy for tagging and preview in search scripts.
+- Added error checking for user entered URL.
+- Renamed scripts for better differentiation and rearranged source code.
+
+## 0.5.0 (2026-11-12) @The_Zhu
+
+- Added script `Bandcamp Search` to search by artist and album name again, with release dates. Needs [Mp3tag Proxy](https://community.mp3tag.de/t/71557).
+- Added configuration settings to omit albums or tracks from search results again.
+- Changed full date format YYYY-MM-DD for `YEAR` and highest quality for cover art to be on by default.
+
 ## 0.4.9 (2026-09-17) @yorickausyps
 
 - Added configuration setting to use "WWW BANDCAMP" to store the Bandcamp URL used as web source.

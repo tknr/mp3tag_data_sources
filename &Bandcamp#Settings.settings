@@ -14,7 +14,7 @@
       "type": "bool",
       "key": "maxCoverQuality",
       "title": "Highest quality for cover art",
-      "default": false
+      "default": true
     },
     {
 	  "type": "separator"
@@ -39,14 +39,14 @@
     {
       "type": "bool",
       "key": "standardUppercase",
-      "title": "Apply standard capitalization to titles",
+      "title": "Apply standard capitalization to artist name and album and track title",
       "default": false
     },
     {
       "type": "bool",
       "key": "fullDateFormat",
       "title": "Use full date format YYYY-MM-DD for year field",
-      "default": false
+      "default": true
     },
     {
 	  "type": "separator"
@@ -76,6 +76,38 @@
 	  "title": "Use \"WWW BANDCAMP\" for album URL of the used web source",
 	  "default": false
 	},
+	{
+	  "type": "separator"
+	},
+	{
+	  "type": "heading",
+	  "key": "searchResults",
+	  "title": "Search results (needs Mp3tag Proxy)"
+	},
+    {
+      "type": "bool",
+      "key": "listAlbums",
+      "title": "List Albums",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "listTracks",
+      "title": "List Tracks",
+      "default": true
+    },
+    {
+      "type": "bool",
+      "key": "mp3tagProxy",
+      "title": "Use Mp3tag Proxy for album tagging",
+      "default": false
+    },
+    {
+      "type": "bool",
+      "key": "browserProxy",
+      "title": "Use Mp3tag Proxy for album preview",
+      "default": false
+    },
     {
       "type": "separator"
     }
@@ -125,7 +157,27 @@
 	  {
 	    "key": "WWWBandcamp",
 	    "title": "Verwende \"WWW BANDCAMP\" für den Album-URL der Websource"
-	  }
+	  },
+	  {
+	    "key": "searchResults",
+	    "title": "Suchergebnisse (benötigt Mp3tag Proxy)"
+	  },
+	  {
+	    "key": "listAlbums",
+	    "title": "Liste der Alben"
+	  },
+	  {
+	    "key": "listTracks",
+	    "title": "Liste der Titel"
+	  },
+	  {
+        "key": "mp3tagProxy",
+        "title": "Verwende Mp3tag Proxy für Album Tags"
+      },
+      {
+        "key": "browserProxy",
+        "title": "Verwende Mp3tag Proxy für Album Vorschau"
+      }
      ]
   }
 }

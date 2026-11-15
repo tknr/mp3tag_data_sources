@@ -6,11 +6,28 @@
 #DebugWriteInput "bandcamp-album-input.out"
 #Debug "ON" "bandcamp-album-debug.out"
 
-# extract embedded Json data
-FindLine "<script type=\"application/ld+json\">"
+# Check for Bandcamp URL
+Use "%CurrentUrl%"
+RegexpReplace "^https?://.*?(bandcamp\.com/).*" "$1"
+ifnot "bandcamp.com"
+	Set "<Error>" "No Bandcamp URL %CurrentUrl%"
+	OutputTo "<Fatal>"
+	# force abort
+	json "ON" "current"
+EndIf
+
+# Extract embedded JSON data
+FindLine "<script type=\"application/ld+json\">" 1 1
+If ""
+	# Prepare a meaningful error message for no JSON data found
+	Set "<Error>" "No JSON data found in %CurrentUrl%"
+	OutputTo "<Fatal>"
+	# force abort
+	json "ON" "current"
+EndIf
 JoinUntil "</script>"
-RegexpReplace "^.*?json\">\s*" ""
-RegexpReplace "</script>.*" ""
+RegexpReplace "^.*?json\">\s*(.*)</script>.*" "$1"
+# Vertical Bar is used internally and therefore has to be replaced in the input data
 Replace "|" "$verticalBar()"
 
 json "ON" "current"
@@ -67,11 +84,7 @@ If "MusicAlbum"
 
 	OutputTo "ALBUM"
 	json_select "name"
-	IfVar "standardUppercase" "true"
-		SayFormat "$caps2(%_current%)"
-	Else
-		SayRest
-	EndIf
+	SayRest
 
 	OutputTo "TOTALTRACKS"
 	json_select "numTracks"
@@ -107,11 +120,7 @@ If "MusicAlbum"
 
 		OutputTo "TITLE"
 		json_select "name"
-		IfVar "standardUppercase" "true"
-			SayFormat "$caps2(%_current%)"
-		Else
-			SayRest
-		EndIf
+		SayRest
 		Say "|"
 
 		OutputTo "TRACKS"
@@ -163,11 +172,7 @@ Else
 	If "inAlbum"
 		OutputTo "ALBUM"
 		json_select "name"
-		IfVar "standardUppercase" "true"
-			SayFormat "$caps2(%_current%)"
-		Else
-			SayRest
-		EndIf
+		SayRest
 		json_select_object "byArtist"
 		If "byArtist"
 			OutputTo "_TEMP_ARTIST"
@@ -198,11 +203,7 @@ Else
 	
 	OutputTo "TITLE"
 	json_select "name"
-	IfVar "standardUppercase" "true"
-		SayFormat "$caps2(%_current%)"
-	Else
-		SayRest
-	EndIf
+	SayRest
 	Say "|"
 
 	OutputTo "TRACKS"
@@ -261,6 +262,28 @@ Endif
 OutputTo "CREDITS%_POSTFIX%"
 json_select "creditText"
 SayRest
+
+# Postprozessing for standard uppercase tags
+IfVar "standardUppercase" "true"
+	Use "%ALBUM%"
+	Set "ALBUM"
+	OutputTo "ALBUM"
+	SayFormat "$caps2(%_current%,' -(|')" 1
+	IfOutput "ALBUMARTIST"
+		Use "%ALBUMARTIST%"
+		Set "ALBUMARTIST"
+		OutputTo "ALBUMARTIST"
+		SayFormat "$caps2(%_current%,' -(|')" 1
+	EndIf
+	Use "%ARTIST%"
+	Set "ARTIST"
+	OutputTo "ARTIST"
+	SayFormat "$caps2(%_current%,' -(|')" 1
+	Use "%TITLE%"
+	Set "TITLE"
+	OutputTo "TITLE"
+	SayFormat "$caps2(%_current%,' -(|')" 1
+EndIf
 
 Set "_JOIN"
 Set "_POSTFIX"

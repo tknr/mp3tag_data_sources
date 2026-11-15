@@ -1,0 +1,23 @@
+# Bandcamp Tag Source for Mp3tag
+#
+# Initial release by ms6676749.
+# See CHANGELOG.md for a list of changes.
+#
+# Search by artist, needs Mp3tag Proxy running: https://community.mp3tag.de/t/71557
+# Results parser taken from 0.4.3 by Florian.
+
+[Name]=Bandcamp Artist via Mp3tag Proxy
+[BasedOn]=bandcamp.com
+[IndexUrl]=http://127.0.0.1:8787/https://bandcamp.com/search?q=%s
+[AlbumUrl]=
+[WordSeparator]=%20
+[IndexFormat]=%_coverurl%|%_coverfullurl%|%_preview%|%_url%|%Type%|%Artist%|%Album%|%Date%
+[SearchBy]=Artist||%artist%||%s
+[Encoding]=url-utf-8
+[Settings]=&Bandcamp#Settings.settings
+[MinAppVersionWin]=3.22
+[MinAppVersionMac]=1.8.6
+[Version]=0.5.1
+
+[Include]=&Bandcamp#ParserScriptIndex.inc
+[Include]=&Bandcamp#ParserScriptAlbum.inc
