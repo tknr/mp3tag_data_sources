@@ -1,5 +1,10 @@
 # Changelog — Bandcamp Tag Source for Mp3tag
 
+## 0.5.2 (2026-11-16) @yorickausyps
+
+- Maximum cover quality is also used for search results full cover preview
+- Inhibit that both album and track configuration settings can be set to false 
+
 ## 0.5.1 (2026-11-13) @yorickausyps
 
 - Added full cover preview to search results.
